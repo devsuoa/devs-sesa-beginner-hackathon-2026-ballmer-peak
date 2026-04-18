@@ -1,105 +1,235 @@
 .page {
-  padding: 0 20px;
+  min-height: 100vh;
+  background: #182436;
+  color: #f4f6fb;
 }
 
-.title {
-  text-align: center;
-  font-size: 40px;
-  margin: 60px 0 8px;
+.shell {
+  max-width: 1130px;
+  margin: 0 auto;
+  padding: 28px 40px 0;
 }
 
-.subtitle {
-  text-align: center;
-  color: #94a3b8;
-  font-size: 18px;
-  margin: 0 0 40px;
-}
-
-.content {
+.header {
   display: flex;
-  gap: 40px;
-  margin-bottom: 40px;
-  flex-wrap: wrap; /* helps responsiveness */
-}
-
-.panel {
-  flex: 1;
-  background-color: #1e293b;
-  border-radius: 12px;
-  padding: 24px;
-  min-height: 300px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.panel h2 {
-  margin: 0 0 12px;
-}
-
-/* 🌌 GRID LAYOUT */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  gap: 16px;
-  justify-items: center;
   align-items: center;
+  justify-content: space-between;
+  margin-bottom: 48px;
 }
 
-/* 🪐 PLANET BUTTON */
-.planetButton {
-  width: 70px;
-  height: 70px;
+.logoWrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logoIcon {
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
-  border: none;
+  background: #546f98;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.logoText {
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.profilePill {
+  width: 232px;
+  height: 60px;
+  border-radius: 999px;
+  background: #566f97;
+}
+
+.searchBar {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 0;
+  padding: 6px;
+  border: 6px solid #516c97;
+  border-radius: 999px;
+  margin-bottom: 42px;
+}
+
+.filterChip {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #1a2435;
+  border-radius: 999px;
+  padding: 14px 18px;
+}
+
+.filterDot {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #54709a;
+}
+
+.filterText {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  font-size: 15px;
+  color: #edf1fa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.filterLabel {
+  font-weight: 400;
+}
+
+.searchButton {
+  border: 0;
+  min-width: 114px;
+  padding: 0 28px;
+  border-radius: 999px;
+  background: #1a2435;
+  color: #f5f7fb;
+  font-size: 18px;
   cursor: pointer;
-
-  background: radial-gradient(circle at 30% 30%, #60a5fa, #1e3a8a);
-  color: white;
-  font-size: 11px;
-  font-weight: 600;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  text-align: center;
-
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.planetButton:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(96, 165, 250, 0.6);
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 34px;
 }
 
-.displayBox {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #0f172a;
-  border-radius: 10px;
-  padding: 16px;
+.card {
+  min-width: 0;
 }
 
-.placeholder {
-  color: #475569;
+.imageFrame {
+  position: relative;
+  height: 132px;
+  padding: 7px;
+  border-radius: 40px;
+  background: #56719c;
+  overflow: hidden;
 }
 
-.centered {
-  text-align: center;
+.planetArt {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 34px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 66% 24%, rgba(255, 255, 255, 0.96) 0 4%, rgba(255, 255, 255, 0.45) 5%, transparent 10%),
+    radial-gradient(circle at 50% 44%, rgba(201, 93, 45, 0.5) 0 10%, transparent 24%),
+    linear-gradient(180deg, rgba(15, 29, 47, 0.1), rgba(0, 0, 0, 0.78)),
+    #000;
 }
 
-/* 📱 MOBILE RESPONSIVE */
-@media (max-width: 600px) {
-  .planetButton {
-    width: 55px;
-    height: 55px;
-    font-size: 9px;
+.planetArt::before {
+  content: "";
+  position: absolute;
+  inset: auto -18% -76% -14%;
+  height: 168%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 56% 26%, rgba(255, 212, 177, 0.95) 0 12%, rgba(235, 156, 101, 0.92) 32%, rgba(177, 94, 56, 0.92) 60%, rgba(110, 48, 37, 0.88) 84%, rgba(30, 30, 34, 0.95) 100%);
+  box-shadow:
+    inset -58px -32px 72px rgba(28, 22, 31, 0.9),
+    inset 16px 14px 30px rgba(255, 247, 236, 0.35);
+  transform: rotate(11deg);
+}
+
+.planetArt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 43% 20%, rgba(168, 202, 227, 0.55) 0 7%, transparent 15%),
+    radial-gradient(circle at 28% 36%, rgba(101, 126, 149, 0.32) 0 10%, transparent 22%),
+    radial-gradient(circle at 48% 70%, rgba(255, 247, 235, 0.28) 0 6%, transparent 13%);
+  mix-blend-mode: screen;
+}
+
+.detailsButton {
+  position: absolute;
+  top: 18px;
+  right: 12px;
+  border: 0;
+  border-radius: 999px;
+  background: #5a739d;
+  color: #eef3fb;
+  padding: 10px 13px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.cardText {
+  margin: 14px 12px 0;
+  color: #f2f4f8;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.footerBar {
+  margin-top: 26px;
+  height: 42px;
+  background: #597299;
+}
+
+@media (max-width: 1080px) {
+  .searchBar {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    border-radius: 32px;
   }
 
-  .content {
+  .cardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 740px) {
+  .shell {
+    padding: 24px 20px 0;
+  }
+
+  .header {
+    gap: 18px;
+    margin-bottom: 28px;
     flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profilePill {
+    width: min(232px, 100%);
+  }
+
+  .searchBar {
+    grid-template-columns: 1fr;
+    border-radius: 28px;
+  }
+
+  .filterText {
+    white-space: normal;
+  }
+
+  .searchButton {
+    min-height: 54px;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .imageFrame {
+    height: 156px;
   }
 }
