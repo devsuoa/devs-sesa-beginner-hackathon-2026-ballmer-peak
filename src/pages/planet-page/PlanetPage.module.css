@@ -1,3 +1,7 @@
+.page {
+  padding: 0 20px;
+}
+
 .title {
   text-align: center;
   font-size: 40px;
@@ -6,7 +10,7 @@
 
 .subtitle {
   text-align: center;
-  color: #94A3B8;
+  color: #94a3b8;
   font-size: 18px;
   margin: 0 0 40px;
 }
@@ -15,88 +19,87 @@
   display: flex;
   gap: 40px;
   margin-bottom: 40px;
-  align-items: flex-start;
+  flex-wrap: wrap; /* helps responsiveness */
 }
 
-.steps {
+.panel {
   flex: 1;
-  background-color: #1E293B;
+  background-color: #1e293b;
   border-radius: 12px;
   padding: 24px;
-}
-
-.steps h2 {
-  margin: 0 0 12px;
-}
-
-.steps ol {
-  padding-left: 20px;
-  margin: 0;
+  min-height: 300px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.steps li {
-  color: #94A3B8;
-  font-size: 14px;
-  line-height: 1.5;
+.panel h2 {
+  margin: 0 0 12px;
 }
 
-.steps strong {
-  color: white;
-}
-
-.steps code {
-  background-color: #0f172a;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 13px;
-  color: #3B82F6;
-}
-
-.demo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+/* 🌌 GRID LAYOUT */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 16px;
+  justify-items: center;
   align-items: center;
 }
 
-.demo h2 {
-  margin: 0 0 12px;
-  align-self: flex-start;
-}
+/* 🪐 PLANET BUTTON */
+.planetButton {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
 
-.preview {
-  background-color: #1E293B;
-  border-radius: 12px;
-  width: 100%;
-  height: 200px;
+  background: radial-gradient(circle at 30% 30%, #60a5fa, #1e3a8a);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+
+  text-align: center;
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.preview img {
-  width: 96px;
-  height: 96px;
+.planetButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(96, 165, 250, 0.6);
 }
 
-.pokemonName {
-  text-transform: capitalize;
-  font-size: 18px;
-  font-weight: bold;
-  margin: 4px 0 0;
+.displayBox {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0f172a;
+  border-radius: 10px;
+  padding: 16px;
 }
 
 .placeholder {
   color: #475569;
-  font-size: 14px;
 }
 
 .centered {
   text-align: center;
 }
 
+/* 📱 MOBILE RESPONSIVE */
+@media (max-width: 600px) {
+  .planetButton {
+    width: 55px;
+    height: 55px;
+    font-size: 9px;
+  }
+
+  .content {
+    flex-direction: column;
+  }
+}
