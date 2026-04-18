@@ -11,6 +11,8 @@ type FilterChip = {
 };
 
 type Phase = "idle" | "opening" | "open" | "closing";
+type BookingPhase = "idle" | "entering" | "open" | "leaving";
+type BookingStep = 1 | 2 | 3;
 
 type CardRect = {
   top: number;
@@ -18,6 +20,9 @@ type CardRect = {
   width: number;
   height: number;
 };
+
+// MVP: always send receipt to this address
+const MVP_RECEIPT_EMAIL = "alexl210107@gmail.com";
 
 type PlanetCard = {
   id: number;
@@ -506,6 +511,61 @@ function PlanetPage() {
   const [isDetailOpen, setIsDetailOpen] = useState(true);
   const [isTrackAnimated, setIsTrackAnimated] = useState(false);
   const [activePlanetId, setActivePlanetId] = useState<number>(planetCards[0].id);
+
+  // Booking modal state
+  const [bookingPhase, setBookingPhase] = useState<BookingPhase>("idle");
+  const [bookingStep, setBookingStep] = useState<BookingStep>(1);
+  const [bookingPlanet, setBookingPlanet] = useState<PlanetCard | null>(null);
+  const [stepAnimating, setStepAnimating] = useState(false);
+  const [stepDirection, setStepDirection] = useState<"forward" | "back">("forward");
+  const pricePillRef = useRef<HTMLButtonElement>(null);
+
+  // Payment fields
+  const [cardName, setCardName] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+
+  const isPaymentReady = cardName.trim() !== "" && cardNumber.replace(/\s/g, "").length === 16 && cardExpiry.trim() !== "" && cardCvv.trim().length >= 3;
+
+  const formatCardNumber = (val: string) => val.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
+  const formatExpiry = (val: string) => { const d = val.replace(/\D/g, "").slice(0, 4); return d.length >= 3 ? d.slice(0, 2) + "/" + d.slice(2) : d; };
+
+  const getNights = () => {
+    if (!searchState.arrivalDate || !searchState.departureDate) return 1;
+    const ms = new Date(searchState.departureDate).getTime() - new Date(searchState.arrivalDate).getTime();
+    return Math.max(1, Math.round(ms / (1000 * 60 * 60 * 24)));
+  };
+
+  const openBooking = (planet: PlanetCard) => {
+    setBookingPlanet(planet);
+    setBookingStep(1);
+    setCardName(""); setCardNumber(""); setCardExpiry(""); setCardCvv("");
+    setBookingPhase("entering");
+    requestAnimationFrame(() => requestAnimationFrame(() => setBookingPhase("open")));
+  };
+
+  const closeBooking = () => {
+    setBookingPhase("leaving");
+    setTimeout(() => { setBookingPhase("idle"); setBookingPlanet(null); }, 420);
+  };
+
+  const goToStep = (next: BookingStep, dir: "forward" | "back" = "forward") => {
+    setStepDirection(dir);
+    setStepAnimating(true);
+    setTimeout(() => {
+      setBookingStep(next);
+      setStepAnimating(false);
+    }, 320);
+  };
+
+  const handleProceedToPayment = () => goToStep(2, "forward");
+  const handleBackToSummary = () => goToStep(1, "back");
+  const handleConfirmPayment = () => {
+    // MVP: "send" email — just log it
+    console.log(`Receipt sent to ${MVP_RECEIPT_EMAIL} for booking on ${bookingPlanet?.name}`);
+    goToStep(3, "forward");
+  };
   const activePlanetIndex = planetCards.findIndex(
     (planet) => planet.id === activePlanetId,
   );
@@ -698,7 +758,14 @@ function PlanetPage() {
                       className={styles.detailImage}
                     />
                     <span className={styles.detailOverlay} aria-hidden="true" />
-                    <div className={styles.pricePill}>Prices: {planet.price}</div>
+                    <button
+                      ref={planet.id === activePlanetId ? pricePillRef : undefined}
+                      className={styles.pricePill}
+                      onClick={(e) => { e.stopPropagation(); openBooking(planet); }}
+                      aria-label={`Book ${planet.name} at ${planet.price}`}
+                    >
+                      {planet.price} · Book
+                    </button>
                   </div>
                 ))}
               </div>
@@ -866,6 +933,186 @@ function PlanetPage() {
             </div>
           </div>
         )}
+
+        {/* ── Booking backdrop ── */}
+        {bookingPhase !== "idle" && (
+          <div className={`${styles.bookingBackdrop} ${bookingPhase === "open" ? styles.bookingBackdropVisible : ""}`} onClick={closeBooking} />
+        )}
+
+        {/* ── Booking modal — slides up from bottom ── */}
+        {bookingPhase !== "idle" && bookingPlanet && (() => {
+          const nights = getNights();
+          const nightlyRate = parseInt(bookingPlanet.price.replace(/[^0-9]/g, ""), 10);
+          const subtotal = nightlyRate * nights;
+          const tax = Math.round(subtotal * 0.12);
+          const total = subtotal + tax;
+          const guestsNum = parseInt(searchState.guests, 10) || 1;
+
+          return (
+            <div className={`${styles.bookingModal} ${styles[`bookingModal_${bookingPhase}`]}`}>
+
+              {/* Step indicator */}
+              <div className={styles.bookingStepTrack}>
+                {[1, 2, 3].map((s) => (
+                  <div key={s} className={styles.bookingStepItem}>
+                    <div className={`${styles.bookingStepDot} ${bookingStep >= s ? styles.bookingStepDotActive : ""}`}>{s}</div>
+                    {s < 3 && <div className={`${styles.bookingStepLine} ${bookingStep > s ? styles.bookingStepLineActive : ""}`} />}
+                  </div>
+                ))}
+              </div>
+
+              {/* Step label */}
+              <p className={styles.bookingStepLabel}>
+                {bookingStep === 1 ? "BOOKING SUMMARY" : bookingStep === 2 ? "PAYMENT" : "CONFIRMED"}
+              </p>
+
+              {/* Sliding step panels */}
+              <div className={styles.bookingSlider}>
+                <div
+                  className={`${styles.bookingSlides} ${stepAnimating ? (stepDirection === "forward" ? styles.bookingSlidesExitLeft : styles.bookingSlidesExitRight) : ""}`}
+                  style={{ transform: `translateX(-${(bookingStep - 1) * 100}%)` }}
+                >
+
+                  {/* ── Step 1: Summary ── */}
+                  <div className={styles.bookingSlide}>
+                    <div className={styles.bookingThumb}>
+                      <img src={bookingPlanet.image} alt={bookingPlanet.name} className={styles.bookingThumbImg} />
+                      <div className={styles.bookingThumbOverlay} />
+                      <span className={styles.bookingThumbName}>{bookingPlanet.name}</span>
+                    </div>
+
+                    <div className={styles.bookingSummaryRows}>
+                      <div className={styles.bookingSummaryRow}>
+                        <span className={styles.bookingSummaryLabel}>Check-in</span>
+                        <span className={styles.bookingSummaryValue}>{searchState.arrivalDate ? new Date(searchState.arrivalDate).toLocaleDateString("en-NZ", { day: "numeric", month: "long", year: "numeric" }) : "—"}</span>
+                      </div>
+                      <div className={styles.bookingSummaryRow}>
+                        <span className={styles.bookingSummaryLabel}>Check-out</span>
+                        <span className={styles.bookingSummaryValue}>{searchState.departureDate ? new Date(searchState.departureDate).toLocaleDateString("en-NZ", { day: "numeric", month: "long", year: "numeric" }) : "—"}</span>
+                      </div>
+                      <div className={styles.bookingSummaryRow}>
+                        <span className={styles.bookingSummaryLabel}>Guests</span>
+                        <span className={styles.bookingSummaryValue}>{guestsNum} guest{guestsNum !== 1 ? "s" : ""} · {searchState.guestSize}</span>
+                      </div>
+                      <div className={styles.bookingSummaryDivider} />
+                      <div className={styles.bookingSummaryRow}>
+                        <span className={styles.bookingSummaryLabel}>${nightlyRate.toLocaleString()} × {nights} night{nights !== 1 ? "s" : ""}</span>
+                        <span className={styles.bookingSummaryValue}>${subtotal.toLocaleString()}</span>
+                      </div>
+                      <div className={styles.bookingSummaryRow}>
+                        <span className={styles.bookingSummaryLabel}>Galactic transit tax (12%)</span>
+                        <span className={styles.bookingSummaryValue}>${tax.toLocaleString()}</span>
+                      </div>
+                      <div className={styles.bookingSummaryDivider} />
+                      <div className={`${styles.bookingSummaryRow} ${styles.bookingSummaryTotal}`}>
+                        <span className={styles.bookingSummaryLabel}>Total</span>
+                        <span className={styles.bookingSummaryValue}>${total.toLocaleString()}</span>
+                      </div>
+                    </div>
+
+                    <button className={styles.bookingProceed} onClick={handleProceedToPayment}>
+                      Proceed to checkout →
+                    </button>
+                  </div>
+
+                  {/* ── Step 2: Payment ── */}
+                  <div className={styles.bookingSlide}>
+                    <h3 className={styles.bookingPayTitle}>Payment Details</h3>
+                    <p className={styles.bookingPaySub}>Your receipt will be sent to <strong>{MVP_RECEIPT_EMAIL}</strong></p>
+
+                    <div className={styles.bookingPayFields}>
+                      <input
+                        className={styles.bookingPayInput}
+                        placeholder="Cardholder name"
+                        value={cardName}
+                        onChange={(e) => setCardName(e.target.value)}
+                      />
+                      <input
+                        className={styles.bookingPayInput}
+                        placeholder="Card number"
+                        value={cardNumber}
+                        onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+                        maxLength={19}
+                      />
+                      <div className={styles.bookingPayRow}>
+                        <input
+                          className={styles.bookingPayInput}
+                          placeholder="MM/YY"
+                          value={cardExpiry}
+                          onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
+                          maxLength={5}
+                        />
+                        <input
+                          className={styles.bookingPayInput}
+                          placeholder="CVV"
+                          value={cardCvv}
+                          onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                          maxLength={4}
+                          type="password"
+                        />
+                      </div>
+                    </div>
+
+                    <div className={styles.bookingPayTotal}>
+                      Total due: <strong>${total.toLocaleString()}</strong>
+                    </div>
+
+                    <div className={styles.bookingPayActions}>
+                      <button className={styles.bookingBack} onClick={handleBackToSummary}>← Back</button>
+                      <button
+                        className={`${styles.bookingProceed} ${styles.bookingProceedSmall} ${isPaymentReady ? styles.bookingProceedReady : ""}`}
+                        disabled={!isPaymentReady}
+                        onClick={handleConfirmPayment}
+                      >
+                        Confirm & Pay
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* ── Step 3: Confirmation ── */}
+                  <div className={styles.bookingSlide}>
+                    <div className={styles.bookingConfirm}>
+                      <div className={styles.bookingConfirmIcon}>✦</div>
+                      <h3 className={styles.bookingConfirmTitle}>Booking Confirmed!</h3>
+                      <p className={styles.bookingConfirmSub}>
+                        Your stay on <strong>{bookingPlanet.name}</strong> is booked.<br />
+                        A receipt has been sent to <strong>{MVP_RECEIPT_EMAIL}</strong>.
+                      </p>
+
+                      <div className={styles.bookingConfirmDetails}>
+                        <div className={styles.bookingSummaryRow}>
+                          <span className={styles.bookingSummaryLabel}>Planet</span>
+                          <span className={styles.bookingSummaryValue}>{bookingPlanet.name}</span>
+                        </div>
+                        <div className={styles.bookingSummaryRow}>
+                          <span className={styles.bookingSummaryLabel}>Check-in</span>
+                          <span className={styles.bookingSummaryValue}>{searchState.arrivalDate ? new Date(searchState.arrivalDate).toLocaleDateString("en-NZ", { day: "numeric", month: "short" }) : "—"}</span>
+                        </div>
+                        <div className={styles.bookingSummaryRow}>
+                          <span className={styles.bookingSummaryLabel}>Check-out</span>
+                          <span className={styles.bookingSummaryValue}>{searchState.departureDate ? new Date(searchState.departureDate).toLocaleDateString("en-NZ", { day: "numeric", month: "short" }) : "—"}</span>
+                        </div>
+                        <div className={styles.bookingSummaryDivider} />
+                        <div className={`${styles.bookingSummaryRow} ${styles.bookingSummaryTotal}`}>
+                          <span className={styles.bookingSummaryLabel}>Total charged</span>
+                          <span className={styles.bookingSummaryValue}>${total.toLocaleString()}</span>
+                        </div>
+                      </div>
+
+                      <button className={styles.bookingProceed} onClick={closeBooking}>
+                        Done
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <button className={styles.bookingClose} onClick={closeBooking}>✕</button>
+            </div>
+          );
+        })()}
+
       </div>
     </main>
   );
