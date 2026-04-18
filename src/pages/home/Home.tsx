@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "./Home.module.css";
+import type { SearchState } from "../../types/search";
 
 type Phase = "idle" | "opening" | "open" | "closing";
 
@@ -29,19 +30,28 @@ function Home() {
   const [tempMax, setTempMax] = useState("");
   const [atmosphere, setAtmosphere] = useState("");
   const [budget, setBudget] = useState("");
-  const [allergies, setAllergies] = useState("");
 
   const cardRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   const handleSearch = () => {
     if (!isSearchReady) return;
+    const nextState: SearchState = {
+      location,
+      arrivalDate,
+      departureDate,
+      guests,
+      guestSize,
+      gravityMin,
+      gravityMax,
+      tempMin,
+      tempMax,
+      atmosphere,
+      budget,
+    };
+
     navigate("/planet-page", {
-      state: {
-        location, arrivalDate, departureDate,
-        guests, guestSize, gravityMin, gravityMax,
-        tempMin, tempMax, atmosphere, budget, allergies,
-      },
+      state: nextState,
     });
   };
 
@@ -156,14 +166,14 @@ const atmosphereOptions = ["Oxygen", "Carbon Dioxide", "Dihydrogen Monoxide", "M
                 />
                 <DatePicker
                   selected={arrivalDate}
-                  onChange={(date) => setArrivalDate(date)}
+                  onChange={(date: Date | null) => setArrivalDate(date)}
                   placeholderText="Arrival date"
                   className={styles.bookingInput}
                   portalId="root"
                 />
                 <DatePicker
                   selected={departureDate}
-                  onChange={(date) => setDepartureDate(date)}
+                  onChange={(date: Date | null) => setDepartureDate(date)}
                   placeholderText="Departure date"
                   className={styles.bookingInput}
                   portalId="root"
@@ -296,15 +306,6 @@ const atmosphereOptions = ["Oxygen", "Carbon Dioxide", "Dihydrogen Monoxide", "M
                   </button>
                 ))}
               </div>
-
-              <label className={styles.prefLabel}>Allergies / Special Notes <span className={styles.optional}>(optional)</span></label>
-              <input
-                type="text"
-                placeholder="e.g. sulfur compounds, methane..."
-                className={`${styles.bookingInput} ${styles.prefInput}`}
-                value={allergies}
-                onChange={(e) => setAllergies(e.target.value)}
-              />
             </div>
 
             <button
