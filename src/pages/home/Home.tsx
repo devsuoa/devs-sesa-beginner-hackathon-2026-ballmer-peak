@@ -1,55 +1,62 @@
-import Button from "../../components/button/Button";
+import { useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import styles from "./Home.module.css";
+import Header from "../../components/Header";
 
-// The home page of the application.
 function Home() {
+  const [arrivalDate, setArrivalDate] = useState<Date | null>(null);
+  const [departureDate, setDepartureDate] = useState<Date | null>(null);
+
   return (
-    <div className="page">
-      {/* Banner section */}
-      <section className={styles.banner}>
-        <div className={styles.bannerText}>
-          <h1>
-            {/* Main title */}
-            <span className={styles.accent}>DEVS x SESA</span>
-            <br />
-            Beginner
-            <br />
-            Hackathon 2026
-          </h1>
+    <div className={styles.page}>
+      {/* Top Bar */}
+      <Header/>
 
-          {/* Subtitle */}
-          <p className={styles.subtitle}>
-            Get ready to build something awesome with your team.
-          </p>
+      {/* Main Content */}
+      <section className={styles.mainContent}>
+        {/* Book a space card slot */}
+        <div className={styles.bookingSlot}>
+          <div className={styles.bookingCard}>
+            <h2 className={styles.bookingTitle}>Book a space</h2>
+            
+            <div className={styles.inputGroup}>
+              <DatePicker
+                selected={arrivalDate}
+                onChange={(date) => setArrivalDate(date)}
+                placeholderText="Arrival date"
+                className={styles.bookingInput}
+              />
+              <DatePicker
+                selected={departureDate}
+                onChange={(date) => setDepartureDate(date)}
+                placeholderText="Departure date"
+                className={styles.bookingInput}
+              />
+              <input type="text" placeholder="Location" className={styles.bookingInput} />
+            </div>
 
-          {/* Button to API Example */}
-          <Button text="planet page" to="/planet-page" />
+            <button className={styles.nextButton}>
+              Next &gt;
+            </button>
+
+          </div>
         </div>
-        <div className={styles.bannerImage}>
-          <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="logo" />
+
+        {/* Hero Image */}
+        <div className={styles.heroImageWrapper}>
+          <img
+            src="/space.jpg"
+            alt="Space"
+            className={styles.heroImage}
+          />
         </div>
       </section>
 
-      {/* Cards section */}
-      <section className={styles.cards}>
-        <div className={styles.card}>
-          <h3>🎉 Have Fun</h3>
-          <p>
-            This is all about enjoying the experience and making memories with
-            your team.
-          </p>
-        </div>
-        <div className={styles.card}>
-          <h3>📚 Learn Stuff</h3>
-          <p>
-            Pick up new skills in React, CSS, and web development along the way.
-          </p>
-        </div>
-        <div className={styles.card}>
-          <h3>🤝 Build Together</h3>
-          <p>Collaborate with your teammates and bring your ideas to life.</p>
-        </div>
-      </section>
+      {/* Footer */}
+      <footer className={styles.footer}>
+        <div className={styles.footerBar} />
+      </footer>
     </div>
   );
 }
