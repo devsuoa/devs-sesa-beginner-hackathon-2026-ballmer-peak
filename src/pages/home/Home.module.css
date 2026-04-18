@@ -6,13 +6,18 @@
   color: #e0e8ff;
 }
 
-/* Top Bar */
+/* ============================================
+   TOP BAR
+   ============================================ */
 .topBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 18px 32px;
   background-color: #1a2540;
+  position: relative;
+  z-index: 10;
+  transition: filter 0.4s ease, opacity 0.4s ease;
 }
 
 .logo {
@@ -35,7 +40,7 @@
   background-color: transparent;
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 12px; 
+  border-radius: 12px;
   padding: 8px 24px;
   font-size: 16px;
   font-weight: 500;
@@ -52,51 +57,84 @@
   border-color: rgba(255, 255, 255, 0.6);
 }
 
-/* --- Main Content Section --- */
+/* ============================================
+   SECTION DIMMING
+   ============================================ */
+.sectionDimmed {
+  filter: blur(2px) brightness(0.45);
+  pointer-events: none;
+  transition: filter 0.4s ease;
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
 .mainContent {
   flex: 1;
   display: flex;
-  flex-direction: column; /* Stack the Title and Content Row vertically */
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 40px 48px;
+  position: relative;
+  z-index: 5;
+  transition: filter 0.4s ease;
 }
 
-/* NEW: Title Styles */
 .mainTitle {
   color: #ffffff;
-  font-size: 48px; /* Makes it big */
+  font-size: 48px;
   font-weight: bold;
   margin-top: 0;
-  margin-bottom: 40px; /* Space between title and the layout */
+  margin-bottom: 40px;
   letter-spacing: 2px;
   text-align: center;
 }
 
-/* NEW: Wrapper for Card and Image */
 .contentRow {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Booking Card Area */
+/* ============================================
+   ORIGINAL BOOKING CARD
+   ============================================ */
 .bookingSlot {
   flex-shrink: 0;
   position: relative;
-  z-index: 10;
-  margin-right: -80px; 
+  z-index: 300;
+  margin-right: -80px;
 }
 
 .bookingCard {
-  background-color: #1a2540; 
+  background-color: #1a2540;
   border-radius: 24px;
   padding: 32px 40px;
   width: 320px;
+  /* instant hide — we don't want a fade because the
+     expanding clone card immediately covers this spot */
+  transition: opacity 0.25s ease;
+}
+
+/* Hide the original card the moment expansion begins */
+.bookingCardHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bookingCardFadingIn {
+  opacity: 0;
+  animation: fadeInCard 0.25s ease 0.2s forwards;
+}
+
+@keyframes fadeInCard {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .bookingTitle {
-  color: #ffffff; 
+  color: #ffffff;
   font-size: 22px;
   font-weight: 500;
   text-align: center;
@@ -111,58 +149,76 @@
 }
 
 .bookingInput {
-  background-color: #131b2e; 
+  background-color: #131b2e;
   border: none;
-  border-radius: 20px; 
+  border-radius: 20px;
   padding: 12px 20px;
   font-size: 14px;
   color: #e0e8ff;
   outline: none;
   height: 40px;
-  width: 100%; 
-  box-sizing: border-box; 
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .bookingInput::placeholder {
-  color: #ffffff; 
-  opacity: 1; 
+  color: #ffffff;
+  opacity: 1;
 }
 
 .inputGroup :global(.react-datepicker-wrapper) {
   width: 100%;
 }
 
-/* UPDATED: Next Button (Half width and centered) */
+/* ============================================
+   NEXT BUTTON
+   ============================================ */
 .nextButton {
-  background-color: #ffffff; 
-  color: #131b2e;
+  background-color: #3a4a66;
+  color: #7a8aaa;
   border: none;
   border-radius: 20px;
   padding: 12px 24px;
   font-size: 16px;
   font-weight: 600;
-  cursor: pointer;
-  
-  width: 50%; /* Forces it to be half the width of the card */
-  margin: 24px auto 0 auto; /* auto pushes inward from both left and right, perfectly centering it */
-  
+  cursor: not-allowed;
+  width: 50%;
+  margin: 24px auto 0 auto;
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.3s ease, color 0.3s ease,
+              box-shadow 0.3s ease, transform 0.15s ease;
 }
 
-.nextButton:hover {
-  background-color: #e0e8ff; 
+.nextButtonReady {
+  background-color: #ffffff;
+  color: #131b2e;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
 }
 
-/* Hero Image */
+.nextButtonReady:hover {
+  background-color: #e0e8ff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   HERO IMAGE
+   ============================================ */
 .heroImageWrapper {
   flex-shrink: 0;
   border-radius: 16px;
   overflow: hidden;
   width: 720px;
   max-width: 100%;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+}
+
+.heroImageCentered {
+  transform: translateX(-200px);
+  opacity: 0.5;
 }
 
 .heroImage {
@@ -172,13 +228,18 @@
   display: block;
 }
 
-/* Footer */
+/* ============================================
+   FOOTER
+   ============================================ */
 .footer {
   background-color: #1a2540;
   padding: 16px 32px;
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+  z-index: 10;
+  transition: filter 0.4s ease;
 }
 
 .footerBar {
@@ -188,7 +249,236 @@
   background-color: #2d3f60;
 }
 
-/* Keep Calendar on top */
+/* ============================================
+   BACKDROP
+   ============================================ */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(10, 14, 26, 0.72);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.backdropVisible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ============================================
+   EXPANDING OVERLAY CARD
+   Uses position: fixed with explicit top/left/width/height
+   set via inline styles so it starts EXACTLY on the
+   original card and transitions to centre.
+   ============================================ */
+.expandedOverlay {
+  position: fixed;
+  z-index: 200;
+  background-color: #1a2540;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7),
+              0 0 0 1px rgba(255, 255, 255, 0.08);
+
+  /* Transition all the geometry props together */
+  transition:
+    top    0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    left   0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    width  0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    border-radius 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* "opening" — first paint at card position, no transition yet */
+.expandedOverlay_opening {
+  transition: none; /* snap to origin position instantly */
+}
+
+
+/* "closing" — transitions back to card rect */
+.expandedOverlay_closing {
+  opacity: 0;
+  transition:
+    top    0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    left   0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    width  0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    border-radius 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.45s ease 0.2s;
+}
+
+/* ============================================
+   EXPANDED INNER CONTENT
+   Fades in only once the card has reached its
+   open position — avoids content appearing
+   during the morph animation
+   ============================================ */
+.expandedInner {
+  padding: 36px 48px;
+  opacity: 0;
+  /* no transition during morph */
+  transition: opacity 0s;
+  overflow-y: auto;
+  max-height: 85vh;
+  scrollbar-width: thin;
+  scrollbar-color: #2d3f60 transparent;
+}
+
+.expandedInnerVisible {
+  opacity: 1;
+  transition: opacity 0.25s ease 0.15s; /* delay slightly after card settles */
+}
+
+/* ============================================
+   PREFERENCES CONTENT STYLES
+   ============================================ */
+.backButton {
+  background: none;
+  border: none;
+  color: #7a8aaa;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s ease;
+}
+
+.backButton:hover {
+  color: #e0e8ff;
+}
+
+.summaryPill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #7a8aaa;
+  background: #131b2e;
+  border-radius: 20px;
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.prefGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.prefLabel {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #7a8aaa;
+  margin-top: 8px;
+}
+
+.required { color: #5b8cf5; }
+
+.optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+  color: #4a5f8a;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stepBtn {
+  background: #131b2e;
+  border: 1px solid #2d3f60;
+  color: #e0e8ff;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  line-height: 1;
+}
+
+.stepBtn:hover {
+  background: #2d3f60;
+  border-color: #4a5f8a;
+}
+
+.stepValue {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  min-width: 24px;
+  text-align: center;
+}
+
+.chipGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  background: #131b2e;
+  border: 1px solid #2d3f60;
+  color: #aab8d4;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.chip:hover {
+  border-color: #4a5f8a;
+  color: #e0e8ff;
+}
+
+.chipActive {
+  background: #2a3f6a;
+  border-color: #5b8cf5;
+  color: #ffffff;
+}
+
+.searchButton {
+  background-color: #3a4a66;
+  color: #7a8aaa;
+  border: none;
+  border-radius: 20px;
+  padding: 14px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: not-allowed;
+  width: 100%;
+  margin-top: 20px;
+  transition: background-color 0.3s ease, color 0.3s ease,
+              box-shadow 0.3s ease, transform 0.15s ease;
+}
+
+.searchButtonReady {
+  background: linear-gradient(135deg, #5b8cf5 0%, #3a6fd8 100%);
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(91, 140, 245, 0.35);
+}
+
+.searchButtonReady:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 28px rgba(91, 140, 245, 0.5);
+}
+
 :global(.react-datepicker-popper) {
   z-index: 9999 !important;
 }
