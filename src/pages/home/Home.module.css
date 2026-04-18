@@ -52,21 +52,40 @@
   border-color: rgba(255, 255, 255, 0.6);
 }
 
-/* Main Content */
+/* --- Main Content Section --- */
 .mainContent {
   flex: 1;
   display: flex;
+  flex-direction: column; /* Stack the Title and Content Row vertically */
   align-items: center;
   justify-content: center;
-  gap: 32px;
   padding: 40px 48px;
 }
 
+/* NEW: Title Styles */
+.mainTitle {
+  color: #ffffff;
+  font-size: 48px; /* Makes it big */
+  font-weight: bold;
+  margin-top: 0;
+  margin-bottom: 40px; /* Space between title and the layout */
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+/* NEW: Wrapper for Card and Image */
+.contentRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Booking Card Area */
 .bookingSlot {
   flex-shrink: 0;
   position: relative;
   z-index: 10;
-  margin-right: -80px; /* This negative margin pulls the image underneath */
+  margin-right: -80px; 
 }
 
 .bookingCard {
@@ -100,19 +119,20 @@
   color: #e0e8ff;
   outline: none;
   height: 40px;
-  width: 100%; /* Added this */
-  box-sizing: border-box; /* Added this to keep padding inside the width */
+  width: 100%; 
+  box-sizing: border-box; 
+}
+
+.bookingInput::placeholder {
+  color: #ffffff; 
+  opacity: 1; 
 }
 
 .inputGroup :global(.react-datepicker-wrapper) {
   width: 100%;
 }
 
-.bookingInput::placeholder {
-  color: #62738d; 
-  opacity: 1; 
-}
-
+/* UPDATED: Next Button (Half width and centered) */
 .nextButton {
   background-color: #ffffff; 
   color: #131b2e;
@@ -122,8 +142,10 @@
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  width: 100%;
-  margin-top: 24px; 
+  
+  width: 50%; /* Forces it to be half the width of the card */
+  margin: 24px auto 0 auto; /* auto pushes inward from both left and right, perfectly centering it */
+  
   display: flex;
   justify-content: center;
   align-items: center;
@@ -134,6 +156,7 @@
   background-color: #e0e8ff; 
 }
 
+/* Hero Image */
 .heroImageWrapper {
   flex-shrink: 0;
   border-radius: 16px;
@@ -163,4 +186,9 @@
   height: 4px;
   border-radius: 2px;
   background-color: #2d3f60;
+}
+
+/* Keep Calendar on top */
+:global(.react-datepicker-popper) {
+  z-index: 9999 !important;
 }
