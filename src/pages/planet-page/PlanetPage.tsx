@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 import styles from "./PlanetPage.module.css";
 
 type FilterChip = {
@@ -18,11 +19,6 @@ type PlanetCard = {
   image: string;
 };
 
-const filters: FilterChip[] = [
-  { label: "Location:", value: "Grafton, Auckland" },
-  { label: "Duration:", value: "Tue 19th - Wed 2nd May" },
-  { label: "People:", value: "2 Adults - 3 Children - 1 Room" },
-];
 
 const planetCards: PlanetCard[] = [
   {
@@ -233,6 +229,25 @@ const planetCards: PlanetCard[] = [
 
 function PlanetPage() {
   const cometLogo = `${import.meta.env.BASE_URL}comet-logo.png`;
+  const { state } = useLocation();
+  const navigate = useNavigate();
+
+  // Redirect back to home if landed here directly with no data
+  if (!state) {
+    navigate("/");
+    return null;
+  }
+
+  const { location, arrivalDate, departureDate, guests, guestSize, atmosphere, budget } = state;
+
+  const arrivalStr = arrivalDate ? new Date(arrivalDate).toLocaleDateString("en-NZ", { day: "numeric", month: "short" }) : "";
+  const departureStr = departureDate ? new Date(departureDate).toLocaleDateString("en-NZ", { day: "numeric", month: "short" }) : "";
+
+  const filters = [
+    { label: "Location:", value: location },
+    { label: "Duration:", value: `${arrivalStr} – ${departureStr}` },
+    { label: "Guests:", value: `${guests} · ${guestSize} · ${atmosphere} atm · ${budget}` },
+  ];
   const [isDetailOpen, setIsDetailOpen] = useState(true);
   const [isTrackAnimated, setIsTrackAnimated] = useState(false);
   const [activePlanetId, setActivePlanetId] = useState<number>(planetCards[0].id);

@@ -231,27 +231,6 @@
 }
 
 /* ============================================
-   FOOTER
-   ============================================ */
-.footer {
-  background-color: #1a2540;
-  padding: 16px 32px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  z-index: 10;
-  transition: filter 0.4s ease;
-}
-
-.footerBar {
-  width: 120px;
-  height: 4px;
-  border-radius: 2px;
-  background-color: #2d3f60;
-}
-
-/* ============================================
    BACKDROP
    ============================================ */
 .backdrop {

@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "./Home.module.css";
@@ -31,6 +32,18 @@ function Home() {
   const [allergies, setAllergies] = useState("");
 
   const cardRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  const handleSearch = () => {
+    if (!isSearchReady) return;
+    navigate("/planet-page", {
+      state: {
+        location, arrivalDate, departureDate,
+        guests, guestSize, gravityMin, gravityMax,
+        tempMin, tempMax, atmosphere, budget, allergies,
+      },
+    });
+  };
 
   const isNextReady = location.trim() !== "" && arrivalDate !== null && departureDate !== null;
   const guestsNum = parseInt(guests, 10);
@@ -173,10 +186,6 @@ const atmosphereOptions = ["Oxygen", "Carbon Dioxide", "Dihydrogen Monoxide", "M
         </div>
       </section>
 
-      <footer className={`${styles.footer} ${sectionsDimmed ? styles.sectionDimmed : ""}`}>
-        <div className={styles.footerBar} />
-      </footer>
-
       {/* Backdrop */}
       <div
         className={`${styles.backdrop} ${dimmed ? styles.backdropVisible : ""}`}
@@ -301,6 +310,7 @@ const atmosphereOptions = ["Oxygen", "Carbon Dioxide", "Dihydrogen Monoxide", "M
             <button
               className={`${styles.searchButton} ${isSearchReady ? styles.searchButtonReady : ""}`}
               disabled={!isSearchReady}
+              onClick={handleSearch}
             >
               🔍 Search spaces
             </button>
