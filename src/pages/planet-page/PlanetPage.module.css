@@ -13,7 +13,7 @@
 .page::after {
   content: "";
   position: fixed;
-  inset: 0;
+  inset: -120px;
   pointer-events: none;
 }
 
@@ -26,7 +26,7 @@
   background-size: 920px auto;
   opacity: 0.68;
   filter: saturate(1.1) brightness(1.02);
-  animation: starDrift 28s linear infinite;
+  animation: none;
 }
 
 .page::after {
@@ -37,7 +37,7 @@
     radial-gradient(circle at 96% 82%, rgba(111, 137, 196, 0.18), transparent 26%),
     radial-gradient(circle at 30% 82%, rgba(154, 104, 188, 0.08), transparent 22%);
   opacity: 0.92;
-  animation: nebulaPulse 14s ease-in-out infinite;
+  animation: none;
 }
 
 .shell {
@@ -512,29 +512,6 @@
   font-size: 0.86rem;
   font-weight: 400;
   line-height: 1.45;
-}
-
-@keyframes starDrift {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-
-  to {
-    transform: translate3d(-24px, -36px, 0);
-  }
-}
-
-@keyframes nebulaPulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.72;
-  }
-
-  50% {
-    transform: scale(1.02);
-    opacity: 0.9;
-  }
 }
 
 @media (max-width: 1180px) {
