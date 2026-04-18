@@ -1,9 +1,16 @@
-import { useRef, useState } from "react";
+/* eslint-disable react-hooks/rules-of-hooks */
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "./PlanetPage.module.css";
-import type { EditableSearchState, SearchState } from "../../types/search";
+import {
+  ATMOSPHERE_OPTIONS,
+  GUEST_SIZE_OPTIONS,
+  PLANET_ARCHETYPE_OPTIONS,
+  type EditableSearchState,
+  type SearchState,
+} from "../../types/search";
 
 type FilterChip = {
   label: string;
@@ -36,6 +43,23 @@ type PlanetCard = {
   image: string;
 };
 
+type PlanetSpec = {
+  gravityValue: number;
+  gravityLabel: string;
+  temperatureValue: number;
+  temperatureLabel: string;
+  atmosphere: string;
+  archetype: string;
+};
+
+type RankedPlanet = PlanetCard & {
+  compatibilityPercent: number;
+};
+
+const preventWheelNumberChange = (event: React.WheelEvent<HTMLInputElement>) => {
+  event.currentTarget.blur();
+};
+
 
 const planetCards: PlanetCard[] = [
   {
@@ -49,7 +73,7 @@ const planetCards: PlanetCard[] = [
       "A bold frontier stay with red dunes, glowing horizons, and panoramic crater views for adventurous travellers.",
     facts: [
       "Stay type: Elevated dome suite",
-      "Gravity: 38% of Earth",
+      "Gravity: 3.71 m/s^2",
       "Climate: Cold desert",
       "Best for: Scenic exploration",
     ],
@@ -66,7 +90,7 @@ const planetCards: PlanetCard[] = [
       "A surreal ringed world with a luminous central void, perfect for travellers who want something dreamlike and impossible.",
     facts: [
       "Stay type: Horizon observatory",
-      "Gravity: 81% of Earth",
+      "Gravity: 7.94 m/s^2",
       "Climate: Ion-lit upper skies",
       "Best for: Surreal cosmic escapes",
     ],
@@ -83,7 +107,7 @@ const planetCards: PlanetCard[] = [
       "A sweeping ring-view destination with golden light, deep-space silence, and a front-row seat to the solar system's grandest skyline.",
     facts: [
       "Stay type: Ringline capsule suite",
-      "Gravity: 106% of Earth",
+      "Gravity: 10.44 m/s^2",
       "Climate: Upper-atmosphere chill",
       "Best for: Cinematic orbit stays",
     ],
@@ -100,8 +124,8 @@ const planetCards: PlanetCard[] = [
       "A radiant amber-world retreat with blazing horizons and warm celestial glow, designed for stylish short-haul cosmic getaways.",
     facts: [
       "Stay type: Cloudline residence",
-      "Gravity: 90% of Earth",
-      "Climate: Dense radiant atmosphere",
+      "Gravity: 8.87 m/s^2",
+      "Climate: Superheated acid-cloud atmosphere",
       "Best for: Luxury heat-lit views",
     ],
     image: `${import.meta.env.BASE_URL}vveus.jpg`,
@@ -117,9 +141,9 @@ const planetCards: PlanetCard[] = [
       "A sunlit Earth-like super-planet with wide desert seas and bright cloud banks, built for travellers chasing a future-home feeling.",
     facts: [
       "Stay type: Terraced observatory resort",
-      "Gravity: 134% of Earth",
+      "Gravity: 19.60 m/s^2",
       "Climate: Warm dry highlands",
-      "Best for: Long-haul luxury explorers",
+      "Best for: Earth-like frontier escapes",
     ],
     image: `${import.meta.env.BASE_URL}kepler452b.png`,
   },
@@ -134,7 +158,7 @@ const planetCards: PlanetCard[] = [
       "A volatile lava-scarred moon with dramatic sulfur plains and constant geological motion for thrill-seeking sightseers.",
     facts: [
       "Stay type: Shielded crater lodge",
-      "Gravity: 18% of Earth",
+      "Gravity: 1.80 m/s^2",
       "Climate: Volcanic extremes",
       "Best for: Extreme geology tours",
     ],
@@ -150,10 +174,10 @@ const planetCards: PlanetCard[] = [
     description:
       "A red frontier world with frosted caps and canyon basins, offering cinematic dawns and crater-edge retreats.",
     facts: [
-      "Stay type: Ridge capsule suites",
-      "Gravity: 41% of Earth",
-      "Climate: Thin cold atmosphere",
-      "Best for: Desert horizon escapes",
+      "Stay type: Magnetically shielded corona skiff",
+      "Gravity: 274.00 m/s^2",
+      "Climate: Blazing plasma storms",
+      "Best for: Extreme star-skimming spectacle",
     ],
     image: `${import.meta.env.BASE_URL}sun.jpg`,
   },
@@ -168,7 +192,7 @@ const planetCards: PlanetCard[] = [
       "An ice-burnished dwarf world with marbled terrain and surreal frozen textures, ideal for quiet distant stays.",
     facts: [
       "Stay type: Polar glass habitat",
-      "Gravity: 8% of Earth",
+      "Gravity: 0.78 m/s^2",
       "Climate: Deep freeze",
       "Best for: Remote reflective travel",
     ],
@@ -185,7 +209,7 @@ const planetCards: PlanetCard[] = [
       "A lush green-brown world with familiar continental tones and a calm habitable atmosphere suited to restorative travel.",
     facts: [
       "Stay type: Forest canopy retreat",
-      "Gravity: 97% of Earth",
+      "Gravity: 9.52 m/s^2",
       "Climate: Temperate mixed biomes",
       "Best for: Earth-like comfort seekers",
     ],
@@ -202,7 +226,7 @@ const planetCards: PlanetCard[] = [
       "A storm-lashed giant of deep cobalt and bronze currents, experienced from a floating orbital ring above colossal cloud bands.",
     facts: [
       "Stay type: High-orbit panorama deck",
-      "Gravity: Extreme",
+      "Gravity: 24.79 m/s^2",
       "Climate: Violent upper-atmosphere storms",
       "Best for: Grand-scale celestial viewing",
     ],
@@ -219,7 +243,7 @@ const planetCards: PlanetCard[] = [
       "A dim-star sanctuary with mineral deserts and glacial coasts, offering one of the most intriguing potentially habitable experiences nearby.",
     facts: [
       "Stay type: Twilight basin villas",
-      "Gravity: 93% of Earth",
+      "Gravity: 9.12 m/s^2",
       "Climate: Cool twilight zones",
       "Best for: Exoplanet discovery stays",
     ],
@@ -236,7 +260,7 @@ const planetCards: PlanetCard[] = [
       "A serene cyan ice giant with soft swirling bands and an elegant glow, best enjoyed from a minimalist orbital suite.",
     facts: [
       "Stay type: Ice-ring observation pod",
-      "Gravity: 89% of Earth",
+      "Gravity: 8.69 m/s^2",
       "Climate: Frozen upper atmosphere",
       "Best for: Calm deep-space panoramas",
     ],
@@ -253,7 +277,7 @@ const planetCards: PlanetCard[] = [
       "A legendary hot-jupiter destination with a glowing dusk face and fractured cloud belts, made for travellers chasing famous firsts in exoplanet history.",
     facts: [
       "Stay type: Magnetosphere-view orbital suite",
-      "Gravity: Ultra high",
+      "Gravity: 7.08 m/s^2",
       "Climate: Superheated gas giant atmosphere",
       "Best for: Prestige deep-space voyages",
     ],
@@ -270,7 +294,7 @@ const planetCards: PlanetCard[] = [
       "A city-covered world of endless skylines, night-glow traffic, and elevated luxury districts for travellers who want cosmopolitan energy at planetary scale.",
     facts: [
       "Stay type: Skyline senate penthouse",
-      "Gravity: 100% of Earth",
+      "Gravity: 9.81 m/s^2",
       "Climate: Temperate urban atmosphere",
       "Best for: Futuristic city escapes",
     ],
@@ -287,7 +311,7 @@ const planetCards: PlanetCard[] = [
       "A colossal machine-world with illuminated circuitry, metallic continents, and a dramatic industrial glow that feels engineered rather than born.",
     facts: [
       "Stay type: Alloy citadel chamber",
-      "Gravity: 112% of Earth",
+      "Gravity: 10.99 m/s^2",
       "Climate: Mechanical techno-atmosphere",
       "Best for: Sci-fi megastructure lovers",
     ],
@@ -304,7 +328,7 @@ const planetCards: PlanetCard[] = [
       "An ice-locked world of pale cloud veils and frozen continents, offering serene blue-white horizons and a hushed polar grandeur.",
     facts: [
       "Stay type: Glacial observatory lodge",
-      "Gravity: 92% of Earth",
+      "Gravity: 11.15 m/s^2",
       "Climate: Permanent cryosphere",
       "Best for: Quiet arctic-style retreats",
     ],
@@ -321,7 +345,7 @@ const planetCards: PlanetCard[] = [
       "A stark snowbound frontier with blizzard plains and brilliant reflective ice fields, suited to hardy explorers who love remote extremes.",
     facts: [
       "Stay type: Shielded tundra outpost",
-      "Gravity: 86% of Earth",
+      "Gravity: 8.44 m/s^2",
       "Climate: Subzero ice storms",
       "Best for: Extreme cold expeditions",
     ],
@@ -338,7 +362,7 @@ const planetCards: PlanetCard[] = [
       "A cratered mineral world shimmering in blue-gold relief, where sunrise is dramatic, fast, and intensely beautiful from protected twilight habitats.",
     facts: [
       "Stay type: Terminator-line bunker suite",
-      "Gravity: 38% of Earth",
+      "Gravity: 3.70 m/s^2",
       "Climate: Extreme heat and cold swings",
       "Best for: Solar-edge spectacle stays",
     ],
@@ -355,7 +379,7 @@ const planetCards: PlanetCard[] = [
       "A molten volcanic realm of crimson fissures and lava-lit nights, unforgettable from fortified cliffside dwellings above the fire seas.",
     facts: [
       "Stay type: Basalt ridge fortress",
-      "Gravity: 96% of Earth",
+      "Gravity: 9.42 m/s^2",
       "Climate: Volcanic inferno",
       "Best for: Dramatic fireworld scenery",
     ],
@@ -372,8 +396,8 @@ const planetCards: PlanetCard[] = [
       "A deep oceanic blue world wrapped in bright cyclones and endless seas, ideal for tranquil floating resorts and panoramic horizon views.",
     facts: [
       "Stay type: Ocean-skimming halo resort",
-      "Gravity: 104% of Earth",
-      "Climate: Maritime superstorm belts",
+      "Gravity: 10.20 m/s^2",
+      "Climate: Deep-ocean cyclone belts",
       "Best for: Luxury waterworld getaways",
     ],
     image: `${import.meta.env.BASE_URL}poseidon.png`,
@@ -389,7 +413,7 @@ const planetCards: PlanetCard[] = [
       "A sunbaked desert planet with ochre basins, wind-carved stone, and heat-haze horizons that feel mythic and cinematic all at once.",
     facts: [
       "Stay type: Dune courtyard residence",
-      "Gravity: 93% of Earth",
+      "Gravity: 9.12 m/s^2",
       "Climate: Arid twin-sun desert",
       "Best for: Desert adventure stays",
     ],
@@ -406,7 +430,7 @@ const planetCards: PlanetCard[] = [
       "A hazy golden moon of methane lakes and muted amber terrain, perfect for travellers drawn to atmospheric mystery and distant quiet.",
     facts: [
       "Stay type: Lake-edge pressure habitat",
-      "Gravity: 14% of Earth",
+      "Gravity: 1.35 m/s^2",
       "Climate: Cryogenic hydrocarbon weather",
       "Best for: Moody off-world solitude",
     ],
@@ -423,7 +447,7 @@ const planetCards: PlanetCard[] = [
       "A powerful red-orange world with dense cloud textures and an imposing presence, made for bold travellers who like heroic-scale destinations.",
     facts: [
       "Stay type: High-citadel sky residence",
-      "Gravity: 118% of Earth",
+      "Gravity: 11.58 m/s^2",
       "Climate: Warm high-pressure atmosphere",
       "Best for: Commanding panoramic stays",
     ],
@@ -440,7 +464,7 @@ const planetCards: PlanetCard[] = [
       "A lush jungle moon with temple-studded terrain, warm green-gold landmasses, and a mysterious violet-lit sky beyond orbit.",
     facts: [
       "Stay type: Canopy temple retreat",
-      "Gravity: 88% of Earth",
+      "Gravity: 8.63 m/s^2",
       "Climate: Humid tropical jungle",
       "Best for: Adventure and ancient ruins",
     ],
@@ -448,13 +472,89 @@ const planetCards: PlanetCard[] = [
   },
 ];
 
-const atmosphereOptions = ["Oxygen", "Carbon Dioxide", "Dihydrogen Monoxide", "Methane", "Vacuum", "Helium", "Hydrogen"];
-const planetArchetypes = ["Solid", "Liquid", "Gas", "Plasma"];
-const guestSizeOptions = [
-  { label: "Small", sublabel: "< 500 cm", value: "small" },
-  { label: "Medium", sublabel: "500-2000 cm", value: "medium" },
-  { label: "Large", sublabel: "> 2000 cm", value: "large" },
-];
+const planetSpecs: Record<number, PlanetSpec> = {
+  1: { gravityValue: 3.71, gravityLabel: "3.71 m/s^2", temperatureValue: -63, temperatureLabel: "-63 C avg", atmosphere: "Carbon Dioxide", archetype: "Solid" },
+  2: { gravityValue: 7.94, gravityLabel: "7.94 m/s^2", temperatureValue: -140, temperatureLabel: "-140 C avg", atmosphere: "Helium", archetype: "Gas" },
+  3: { gravityValue: 10.44, gravityLabel: "10.44 m/s^2", temperatureValue: -178, temperatureLabel: "-178 C avg", atmosphere: "Hydrogen", archetype: "Gas" },
+  4: { gravityValue: 8.87, gravityLabel: "8.87 m/s^2", temperatureValue: 464, temperatureLabel: "464 C avg", atmosphere: "Carbon Dioxide", archetype: "Solid" },
+  5: { gravityValue: 19.60, gravityLabel: "19.60 m/s^2", temperatureValue: 18, temperatureLabel: "18 C avg", atmosphere: "Oxygen", archetype: "Solid" },
+  6: { gravityValue: 1.80, gravityLabel: "1.80 m/s^2", temperatureValue: -5, temperatureLabel: "-130 to 120 C", atmosphere: "Sulfur Dioxide", archetype: "Solid" },
+  7: { gravityValue: 274.00, gravityLabel: "274.00 m/s^2", temperatureValue: 5500, temperatureLabel: "5,500 C surface", atmosphere: "Hydrogen", archetype: "Plasma" },
+  8: { gravityValue: 0.78, gravityLabel: "0.78 m/s^2", temperatureValue: -229, temperatureLabel: "-229 C avg", atmosphere: "Methane", archetype: "Solid" },
+  9: { gravityValue: 9.52, gravityLabel: "9.52 m/s^2", temperatureValue: 21, temperatureLabel: "21 C avg", atmosphere: "Oxygen", archetype: "Solid" },
+  10: { gravityValue: 24.79, gravityLabel: "24.79 m/s^2", temperatureValue: -145, temperatureLabel: "-145 C cloud tops", atmosphere: "Hydrogen", archetype: "Gas" },
+  11: { gravityValue: 9.12, gravityLabel: "9.12 m/s^2", temperatureValue: -22, temperatureLabel: "-22 C avg", atmosphere: "Oxygen", archetype: "Solid" },
+  12: { gravityValue: 8.69, gravityLabel: "8.69 m/s^2", temperatureValue: -224, temperatureLabel: "-224 C avg", atmosphere: "Hydrogen", archetype: "Gas" },
+  13: { gravityValue: 7.08, gravityLabel: "7.08 m/s^2", temperatureValue: 1200, temperatureLabel: "1,200 C dayside", atmosphere: "Hydrogen", archetype: "Gas" },
+  14: { gravityValue: 9.81, gravityLabel: "9.81 m/s^2", temperatureValue: 24, temperatureLabel: "24 C avg", atmosphere: "Oxygen", archetype: "Solid" },
+  15: { gravityValue: 10.99, gravityLabel: "10.99 m/s^2", temperatureValue: 42, temperatureLabel: "42 C core districts", atmosphere: "Ionized Metals", archetype: "Solid" },
+  16: { gravityValue: 11.15, gravityLabel: "11.15 m/s^2", temperatureValue: -214, temperatureLabel: "-214 C avg", atmosphere: "Hydrogen", archetype: "Gas" },
+  17: { gravityValue: 8.44, gravityLabel: "8.44 m/s^2", temperatureValue: -60, temperatureLabel: "-60 C avg", atmosphere: "Nitrogen", archetype: "Solid" },
+  18: { gravityValue: 3.70, gravityLabel: "3.70 m/s^2", temperatureValue: 127, temperatureLabel: "-173 to 427 C", atmosphere: "Vacuum", archetype: "Solid" },
+  19: { gravityValue: 9.42, gravityLabel: "9.42 m/s^2", temperatureValue: 980, temperatureLabel: "980 C lava zones", atmosphere: "Sulfur Dioxide", archetype: "Solid" },
+  20: { gravityValue: 10.20, gravityLabel: "10.20 m/s^2", temperatureValue: 11, temperatureLabel: "11 C avg", atmosphere: "Dihydrogen Monoxide", archetype: "Liquid" },
+  21: { gravityValue: 9.12, gravityLabel: "9.12 m/s^2", temperatureValue: 32, temperatureLabel: "32 C avg", atmosphere: "Nitrogen", archetype: "Solid" },
+  22: { gravityValue: 1.35, gravityLabel: "1.35 m/s^2", temperatureValue: -179, temperatureLabel: "-179 C avg", atmosphere: "Methane", archetype: "Liquid" },
+  23: { gravityValue: 11.58, gravityLabel: "11.58 m/s^2", temperatureValue: 38, temperatureLabel: "38 C avg", atmosphere: "Oxygen", archetype: "Solid" },
+  24: { gravityValue: 8.63, gravityLabel: "8.63 m/s^2", temperatureValue: 27, temperatureLabel: "27 C avg", atmosphere: "Oxygen", archetype: "Solid" },
+};
+
+const getFactValue = (facts: string[], label: string) =>
+  facts.find((fact) => fact.startsWith(`${label}:`))?.split(": ").slice(1).join(": ") ?? "";
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, value));
+
+const getRangeScore = (value: number, min: number, max: number) => {
+  if (value >= min && value <= max) return 1;
+
+  const span = Math.max(max - min, 1);
+  const nearestEdge = value < min ? min : max;
+  const distance = Math.abs(value - nearestEdge);
+  const tolerance = Math.max(span * 1.35, 8);
+
+  return clamp(1 - distance / tolerance, 0, 1);
+};
+
+const calculateCompatibility = (search: EditableSearchState, spec: PlanetSpec) => {
+  const gravityMin = parseFloat(search.gravityMin);
+  const gravityMax = parseFloat(search.gravityMax);
+  const tempMin = parseFloat(search.tempMin);
+  const tempMax = parseFloat(search.tempMax);
+
+  const gravityScore = getRangeScore(spec.gravityValue, Math.min(gravityMin, gravityMax), Math.max(gravityMin, gravityMax));
+  const temperatureScore = getRangeScore(spec.temperatureValue, Math.min(tempMin, tempMax), Math.max(tempMin, tempMax));
+  const atmosphereScore = spec.atmosphere === search.atmosphere ? 1 : 0;
+  const archetypeScore = spec.archetype === search.budget ? 1 : 0;
+
+  const weightedScore =
+    gravityScore * 0.34 +
+    temperatureScore * 0.34 +
+    atmosphereScore * 0.16 +
+    archetypeScore * 0.16;
+
+  return Math.round(weightedScore * 100);
+};
+
+const getCompatibilityTone = (compatibilityPercent: number) => {
+  if (compatibilityPercent >= 90) return "excellent";
+  if (compatibilityPercent >= 70) return "good";
+  return "low";
+};
+
+const rankPlanets = (search: EditableSearchState): RankedPlanet[] =>
+  planetCards
+    .map((planet) => ({
+      ...planet,
+      compatibilityPercent: calculateCompatibility(search, planetSpecs[planet.id]),
+    }))
+    .sort((left, right) => {
+      if (right.compatibilityPercent !== left.compatibilityPercent) {
+        return right.compatibilityPercent - left.compatibilityPercent;
+      }
+
+      return left.name.localeCompare(right.name);
+    });
 
 const OVERLAY_W = 520;
 const OVERLAY_H = 620;
@@ -482,14 +582,19 @@ function PlanetPage() {
   });
 
   const [searchState, setSearchState] = useState<EditableSearchState>(() => toEditableState(initialState));
+  const [appliedSearchState, setAppliedSearchState] = useState<EditableSearchState>(() => toEditableState(initialState));
   const [draftState, setDraftState] = useState<EditableSearchState>(() => toEditableState(initialState));
+  const initialRankedPlanets = useMemo(
+    () => rankPlanets(toEditableState(initialState)),
+    [initialState],
+  );
 
   const arrivalStr = searchState.arrivalDate ? new Date(searchState.arrivalDate).toLocaleDateString("en-NZ", { day: "numeric", month: "short" }) : "";
   const departureStr = searchState.departureDate ? new Date(searchState.departureDate).toLocaleDateString("en-NZ", { day: "numeric", month: "short" }) : "";
 
   const extraFilters: FilterChip[] = [
     { label: "Guest size", value: searchState.guestSize },
-    { label: "Gravity range", value: `${searchState.gravityMin} - ${searchState.gravityMax} N` },
+    { label: "Gravity range", value: `${searchState.gravityMin} - ${searchState.gravityMax} m/s^2` },
     { label: "Temp range", value: `${searchState.tempMin} - ${searchState.tempMax} C` },
     { label: "Atmosphere", value: searchState.atmosphere },
     { label: "Archetype", value: searchState.budget },
@@ -510,7 +615,11 @@ function PlanetPage() {
   const sectionsDimmed = phase === "opening" || phase === "open";
   const [isDetailOpen, setIsDetailOpen] = useState(true);
   const [isTrackAnimated, setIsTrackAnimated] = useState(false);
-  const [activePlanetId, setActivePlanetId] = useState<number>(planetCards[0].id);
+  const [activePlanetId, setActivePlanetId] = useState<number>(initialRankedPlanets[0]?.id ?? planetCards[0].id);
+  const rankedPlanets = useMemo<RankedPlanet[]>(
+    () => rankPlanets(appliedSearchState),
+    [appliedSearchState],
+  );
 
   // Booking modal state
   const [bookingPhase, setBookingPhase] = useState<BookingPhase>("idle");
@@ -566,10 +675,17 @@ function PlanetPage() {
     console.log(`Receipt sent to ${MVP_RECEIPT_EMAIL} for booking on ${bookingPlanet?.name}`);
     goToStep(3, "forward");
   };
-  const activePlanetIndex = planetCards.findIndex(
+  const activePlanetIndex = rankedPlanets.findIndex(
     (planet) => planet.id === activePlanetId,
   );
-  const activePlanet = planetCards[activePlanetIndex];
+  const activePlanet = rankedPlanets[Math.max(activePlanetIndex, 0)] ?? rankedPlanets[0];
+  const activePlanetSpec = planetSpecs[activePlanet.id];
+
+  useEffect(() => {
+    if (rankedPlanets.length === 0) return;
+    setActivePlanetId(rankedPlanets[0].id);
+    setIsTrackAnimated(false);
+  }, [rankedPlanets]);
 
   const handlePlanetSelect = (planetId: number) => {
     setIsTrackAnimated(isDetailOpen);
@@ -627,6 +743,16 @@ function PlanetPage() {
     closeOverlay();
   };
 
+  const handleRunSearch = () => {
+    const nextRankedPlanets = rankPlanets(searchState);
+    setAppliedSearchState(searchState);
+    if (nextRankedPlanets.length > 0) {
+      setActivePlanetId(nextRankedPlanets[0].id);
+    }
+    setIsDetailOpen(true);
+    setIsTrackAnimated(false);
+  };
+
   return (
     <main className={styles.page}>
       <div className={styles.shell}>
@@ -682,7 +808,11 @@ function PlanetPage() {
             Edit
           </button>
 
-          <button type="button" className={styles.actionButton}>
+          <button
+            type="button"
+            className={styles.actionButton}
+            onClick={handleRunSearch}
+          >
             Search
           </button>
         </section>
@@ -694,8 +824,9 @@ function PlanetPage() {
           <div
             className={`${styles.galleryGrid} ${isDetailOpen ? styles.galleryGridExpanded : ""}`}
           >
-            {planetCards.map((planet) => {
+            {rankedPlanets.map((planet) => {
               const isActive = planet.id === activePlanetId;
+              const compatibilityTone = getCompatibilityTone(planet.compatibilityPercent);
 
               return (
                 <article
@@ -719,7 +850,12 @@ function PlanetPage() {
                     </div>
 
                     <p className={styles.cardText}>
-                      Planet: {planet.name} - Compatibility: {planet.compatibility} -
+                      Planet: {planet.name} - Compatibility:
+                      {" "}
+                      <span className={`${styles.compatibilityBadge} ${styles[`compatibilityBadge_${compatibilityTone}`]}`}>
+                        {planet.compatibilityPercent}%
+                      </span>
+                      {" "}-
                       {" "}Distance: {planet.distance}
                     </p>
                   </button>
@@ -750,7 +886,7 @@ function PlanetPage() {
                   transform: `translateX(-${activePlanetIndex * 100}%)`,
                 }}
               >
-                {planetCards.map((planet) => (
+                {rankedPlanets.map((planet) => (
                   <div key={planet.id} className={styles.detailSlide}>
                     <img
                       src={planet.image}
@@ -772,19 +908,47 @@ function PlanetPage() {
             </div>
 
             <div key={activePlanet.id} className={styles.detailBody}>
-              <h2 className={styles.detailTitle}>
-                Planet: {activePlanet.name} - Compatibility: {activePlanet.compatibility}
-                {" "} - Distance: {activePlanet.distance}
-              </h2>
+              <div className={styles.detailTitleRow}>
+                <h2 className={styles.detailTitle}>
+                  Planet: {activePlanet.name}
+                  {" "} - Distance: {activePlanet.distance}
+                </h2>
+                <span
+                  className={`${styles.compatibilityBadge} ${styles.compatibilityBadgeLarge} ${styles[`compatibilityBadge_${getCompatibilityTone(activePlanet.compatibilityPercent)}`]}`}
+                >
+                  Compatibility {activePlanet.compatibilityPercent}%
+                </span>
+              </div>
 
               <p className={styles.detailDescription}>{activePlanet.description}</p>
 
               <div className={styles.factGrid}>
-                {activePlanet.facts.map((fact) => (
-                  <p key={fact} className={styles.factItem}>
-                    {fact}
+                <div className={styles.factColumn}>
+                  <p className={styles.factItem}>
+                    <span className={styles.factLabel}>Stay type:</span> {getFactValue(activePlanet.facts, "Stay type")}
                   </p>
-                ))}
+                  <p className={styles.factItem}>
+                    <span className={styles.factLabel}>Climate:</span> {getFactValue(activePlanet.facts, "Climate")}
+                  </p>
+                  <p className={styles.factItem}>
+                    <span className={styles.factLabel}>Best for:</span> {getFactValue(activePlanet.facts, "Best for")}
+                  </p>
+                </div>
+
+                <div className={styles.factColumn}>
+                  <p className={styles.factItem}>
+                    <span className={styles.factLabel}>Gravity:</span> {activePlanetSpec.gravityLabel}
+                  </p>
+                  <p className={styles.factItem}>
+                    <span className={styles.factLabel}>Temp:</span> {activePlanetSpec.temperatureLabel}
+                  </p>
+                  <p className={styles.factItem}>
+                    <span className={styles.factLabel}>Atmosphere:</span> {activePlanetSpec.atmosphere}
+                  </p>
+                  <p className={styles.factItem}>
+                    <span className={styles.factLabel}>Archetype:</span> {activePlanetSpec.archetype}
+                  </p>
+                </div>
               </div>
             </div>
           </aside>
@@ -843,11 +1007,12 @@ function PlanetPage() {
                   className={`${styles.bookingInput} ${styles.prefInput}`}
                   value={draftState.guests}
                   onChange={(e) => setDraftState((current) => ({ ...current, guests: e.target.value }))}
+                  onWheel={preventWheelNumberChange}
                 />
 
                 <label className={styles.prefLabel}>Guest Size <span className={styles.required}>*</span></label>
                 <div className={styles.chipGrid}>
-                  {guestSizeOptions.map((opt) => (
+                  {GUEST_SIZE_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       className={`${styles.chip} ${draftState.guestSize === opt.value ? styles.chipActive : ""}`}
@@ -858,7 +1023,7 @@ function PlanetPage() {
                   ))}
                 </div>
 
-                <label className={styles.prefLabel}>Gravity Range (N) <span className={styles.required}>*</span></label>
+                <label className={styles.prefLabel}>Gravity Range (m/s^2) <span className={styles.required}>*</span></label>
                 <div className={styles.rangeRow}>
                   <input
                     type="number"
@@ -866,6 +1031,7 @@ function PlanetPage() {
                     className={`${styles.bookingInput} ${styles.rangeInput}`}
                     value={draftState.gravityMin}
                     onChange={(e) => setDraftState((current) => ({ ...current, gravityMin: e.target.value }))}
+                    onWheel={preventWheelNumberChange}
                   />
                   <span className={styles.rangeDash}>-</span>
                   <input
@@ -874,6 +1040,7 @@ function PlanetPage() {
                     className={`${styles.bookingInput} ${styles.rangeInput}`}
                     value={draftState.gravityMax}
                     onChange={(e) => setDraftState((current) => ({ ...current, gravityMax: e.target.value }))}
+                    onWheel={preventWheelNumberChange}
                   />
                 </div>
 
@@ -885,6 +1052,7 @@ function PlanetPage() {
                     className={`${styles.bookingInput} ${styles.rangeInput}`}
                     value={draftState.tempMin}
                     onChange={(e) => setDraftState((current) => ({ ...current, tempMin: e.target.value }))}
+                    onWheel={preventWheelNumberChange}
                   />
                   <span className={styles.rangeDash}>-</span>
                   <input
@@ -893,12 +1061,13 @@ function PlanetPage() {
                     className={`${styles.bookingInput} ${styles.rangeInput}`}
                     value={draftState.tempMax}
                     onChange={(e) => setDraftState((current) => ({ ...current, tempMax: e.target.value }))}
+                    onWheel={preventWheelNumberChange}
                   />
                 </div>
 
                 <label className={styles.prefLabel}>Atmosphere <span className={styles.required}>*</span></label>
                 <div className={styles.chipGrid}>
-                  {atmosphereOptions.map((option) => (
+                  {ATMOSPHERE_OPTIONS.map((option) => (
                     <button
                       key={option}
                       className={`${styles.chip} ${draftState.atmosphere === option ? styles.chipActive : ""}`}
@@ -911,7 +1080,7 @@ function PlanetPage() {
 
                 <label className={styles.prefLabel}>Planet Archetype <span className={styles.required}>*</span></label>
                 <div className={styles.chipGrid}>
-                  {planetArchetypes.map((option) => (
+                  {PLANET_ARCHETYPE_OPTIONS.map((option) => (
                     <button
                       key={option}
                       className={`${styles.chip} ${draftState.budget === option ? styles.chipActive : ""}`}

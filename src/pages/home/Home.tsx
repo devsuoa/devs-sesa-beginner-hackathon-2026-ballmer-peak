@@ -3,7 +3,12 @@ import { useNavigate } from "react-router";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "./Home.module.css";
-import type { SearchState } from "../../types/search";
+import {
+  ATMOSPHERE_OPTIONS,
+  GUEST_SIZE_OPTIONS,
+  PLANET_ARCHETYPE_OPTIONS,
+  type SearchState,
+} from "../../types/search";
 
 type Phase = "idle" | "opening" | "open" | "closing";
 type AuthPhase = "idle" | "entering" | "open" | "leaving";
@@ -29,6 +34,10 @@ const getMvpUsername = (password: string): string => {
   if (password.includes("2")) return MVP_USERNAMES["2"];
   if (password.includes("3")) return MVP_USERNAMES["3"];
   return MVP_USERNAMES["1"]; // default
+};
+
+const preventWheelNumberChange = (event: React.WheelEvent<HTMLInputElement>) => {
+  event.currentTarget.blur();
 };
 
 function Home() {
@@ -160,14 +169,6 @@ function Home() {
     return { top: (vh - EXPANDED_H) / 2, left: (vw - EXPANDED_W) / 2, width: EXPANDED_W, height: EXPANDED_H, maxHeight: "85vh", borderRadius: "24px" };
   };
 
-  const atmosphereOptions = ["Oxygen", "Carbon Dioxide", "Dihydrogen Monoxide", "Methane", "Vacuum", "Helium", "Hydrogen"];
-  const planetArchetypes = ["Solid", "Liquid", "Gas", "Plasma"];
-  const guestSizeOptions = [
-    { label: "Small", sublabel: "< 500 cm", value: "small" },
-    { label: "Medium", sublabel: "500–2000 cm", value: "medium" },
-    { label: "Large", sublabel: "> 2000 cm", value: "large" },
-  ];
-
   const anyDimmed = bookingDimmed || authDimmed;
 
   return (
@@ -258,41 +259,41 @@ function Home() {
             </div>
             <div className={styles.prefGroup}>
               <label className={styles.prefLabel}>Guests <span className={styles.required}>*</span></label>
-              <input type="number" min="1" placeholder="Number of guests" className={`${styles.bookingInput} ${styles.prefInput}`} value={guests} onChange={(e) => setGuests(e.target.value)} />
+              <input type="number" min="1" placeholder="Number of guests" className={`${styles.bookingInput} ${styles.prefInput}`} value={guests} onChange={(e) => setGuests(e.target.value)} onWheel={preventWheelNumberChange} />
 
               <label className={styles.prefLabel}>Guest Size <span className={styles.required}>*</span></label>
               <div className={styles.chipGrid}>
-                {guestSizeOptions.map((opt) => (
+                {GUEST_SIZE_OPTIONS.map((opt) => (
                   <button key={opt.value} className={`${styles.chip} ${guestSize === opt.value ? styles.chipActive : ""}`} onClick={() => setGuestSize(opt.value)}>
                     {opt.label} <span className={styles.chipSub}>{opt.sublabel}</span>
                   </button>
                 ))}
               </div>
 
-              <label className={styles.prefLabel}>Gravity Range (N) <span className={styles.required}>*</span></label>
+              <label className={styles.prefLabel}>Gravity Range (m/s^2) <span className={styles.required}>*</span></label>
               <div className={styles.rangeRow}>
-                <input type="number" placeholder="Min" className={`${styles.bookingInput} ${styles.rangeInput}`} value={gravityMin} onChange={(e) => setGravityMin(e.target.value)} />
+                <input type="number" placeholder="Min" className={`${styles.bookingInput} ${styles.rangeInput}`} value={gravityMin} onChange={(e) => setGravityMin(e.target.value)} onWheel={preventWheelNumberChange} />
                 <span className={styles.rangeDash}>–</span>
-                <input type="number" placeholder="Max" className={`${styles.bookingInput} ${styles.rangeInput}`} value={gravityMax} onChange={(e) => setGravityMax(e.target.value)} />
+                <input type="number" placeholder="Max" className={`${styles.bookingInput} ${styles.rangeInput}`} value={gravityMax} onChange={(e) => setGravityMax(e.target.value)} onWheel={preventWheelNumberChange} />
               </div>
 
               <label className={styles.prefLabel}>Temperature Range (°C) <span className={styles.required}>*</span></label>
               <div className={styles.rangeRow}>
-                <input type="number" placeholder="Min" className={`${styles.bookingInput} ${styles.rangeInput}`} value={tempMin} onChange={(e) => setTempMin(e.target.value)} />
+                <input type="number" placeholder="Min" className={`${styles.bookingInput} ${styles.rangeInput}`} value={tempMin} onChange={(e) => setTempMin(e.target.value)} onWheel={preventWheelNumberChange} />
                 <span className={styles.rangeDash}>–</span>
-                <input type="number" placeholder="Max" className={`${styles.bookingInput} ${styles.rangeInput}`} value={tempMax} onChange={(e) => setTempMax(e.target.value)} />
+                <input type="number" placeholder="Max" className={`${styles.bookingInput} ${styles.rangeInput}`} value={tempMax} onChange={(e) => setTempMax(e.target.value)} onWheel={preventWheelNumberChange} />
               </div>
 
               <label className={styles.prefLabel}>Atmosphere <span className={styles.required}>*</span></label>
               <div className={styles.chipGrid}>
-                {atmosphereOptions.map((a) => (
+                {ATMOSPHERE_OPTIONS.map((a) => (
                   <button key={a} className={`${styles.chip} ${atmosphere === a ? styles.chipActive : ""}`} onClick={() => setAtmosphere(a)}>{a}</button>
                 ))}
               </div>
 
               <label className={styles.prefLabel}>Planet Archetype <span className={styles.required}>*</span></label>
               <div className={styles.chipGrid}>
-                {planetArchetypes.map((b) => (
+                {PLANET_ARCHETYPE_OPTIONS.map((b) => (
                   <button key={b} className={`${styles.chip} ${budget === b ? styles.chipActive : ""}`} onClick={() => setBudget(b)}>{b}</button>
                 ))}
               </div>
