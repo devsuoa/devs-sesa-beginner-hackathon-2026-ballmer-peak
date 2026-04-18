@@ -19,15 +19,24 @@ function Home() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [cardRect, setCardRect] = useState<CardRect | null>(null);
 
-  const [guests, setGuests] = useState(1);
-  const [spaceType, setSpaceType] = useState("");
+  const [guests, setGuests] = useState("");
+  const [guestSize, setGuestSize] = useState("");
+  const [gravityMin, setGravityMin] = useState("");
+  const [gravityMax, setGravityMax] = useState("");
+  const [tempMin, setTempMin] = useState("");
+  const [tempMax, setTempMax] = useState("");
+  const [atmosphere, setAtmosphere] = useState("");
   const [budget, setBudget] = useState("");
-  const [amenities, setAmenities] = useState<string[]>([]);
+  const [allergies, setAllergies] = useState("");
 
   const cardRef = useRef<HTMLDivElement>(null);
 
   const isNextReady = location.trim() !== "" && arrivalDate !== null && departureDate !== null;
-  const isSearchReady = isNextReady && spaceType !== "" && budget !== "";
+  const guestsNum = parseInt(guests, 10);
+  const isGuestsValid = guests.trim() !== "" && !isNaN(guestsNum) && guestsNum > 0;
+  const isGravityValid = gravityMin.trim() !== "" && gravityMax.trim() !== "" && !isNaN(parseFloat(gravityMin)) && !isNaN(parseFloat(gravityMax));
+  const isTempValid = tempMin.trim() !== "" && tempMax.trim() !== "" && !isNaN(parseFloat(tempMin)) && !isNaN(parseFloat(tempMax));
+  const isSearchReady = isNextReady && isGuestsValid && guestSize !== "" && isGravityValid && isTempValid && atmosphere !== "" && budget !== "";
   const dimmed = phase !== "idle";
   const sectionsDimmed = phase === "opening" || phase === "open";
 
@@ -53,13 +62,13 @@ function Home() {
     }, 480);
   };
 
-  const toggleAmenity = (a: string) =>
-    setAmenities((prev) =>
-      prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]
-    );
-
-  const amenityOptions = ["WiFi", "Parking", "Kitchen", "Pet Friendly", "Pool", "Gym"];
-  const spaceTypes = ["Apartment", "House", "Studio", "Villa", "Cabin", "Office"];
+const atmosphereOptions = ["Oxygen", "Carbon Dioxide", "Dihydrogen Monoxide", "Methane", "Vacuum", "Helium", "Hydrogen"];
+  const planetArchetypes = ["Solid", "Liquid", "Gas", "Plasma"];
+  const guestSizeOptions = [
+    { label: "Small", sublabel: "< 500 cm", value: "small" },
+    { label: "Medium", sublabel: "500–2000 cm", value: "medium" },
+    { label: "Large", sublabel: "> 2000 cm", value: "large" },
+  ];
 
   // Inline styles for the animated overlay card
   // "opening"/"closing" → at card's exact position + size
@@ -120,11 +129,11 @@ function Home() {
               ref={cardRef}
               className={`${styles.bookingCard} ${(phase === "open" || phase === "opening") ? styles.bookingCardHidden : ""} ${phase === "closing" ? styles.bookingCardFadingIn : ""}`}
             >
-              <h2 className={styles.bookingTitle}>Book a space</h2>
+              <h2 className={styles.bookingTitle}>Book a Space</h2>
               <div className={styles.inputGroup}>
                 <input
                   type="text"
-                  placeholder="Location"
+                  placeholder="Galactic Sector"
                   className={styles.bookingInput}
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
@@ -189,33 +198,101 @@ function Home() {
             </div>
 
             <div className={styles.prefGroup}>
-              <label className={styles.prefLabel}>Guests</label>
-              <div className={styles.stepper}>
-                <button className={styles.stepBtn} onClick={() => setGuests(Math.max(1, guests - 1))}>−</button>
-                <span className={styles.stepValue}>{guests}</span>
-                <button className={styles.stepBtn} onClick={() => setGuests(guests + 1)}>+</button>
-              </div>
+              <label className={styles.prefLabel}>Guests <span className={styles.required}>*</span></label>
+              <input
+                type="number"
+                min="1"
+                placeholder="Number of guests"
+                className={`${styles.bookingInput} ${styles.prefInput}`}
+                value={guests}
+                onChange={(e) => setGuests(e.target.value)}
+              />
 
-              <label className={styles.prefLabel}>Space type <span className={styles.required}>*</span></label>
+              <label className={styles.prefLabel}>Guest Size <span className={styles.required}>*</span></label>
               <div className={styles.chipGrid}>
-                {spaceTypes.map((t) => (
-                  <button key={t} className={`${styles.chip} ${spaceType === t ? styles.chipActive : ""}`} onClick={() => setSpaceType(t)}>{t}</button>
+                {guestSizeOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    className={`${styles.chip} ${guestSize === opt.value ? styles.chipActive : ""}`}
+                    onClick={() => setGuestSize(opt.value)}
+                  >
+                    {opt.label} <span className={styles.chipSub}>{opt.sublabel}</span>
+                  </button>
                 ))}
               </div>
 
-              <label className={styles.prefLabel}>Budget per night <span className={styles.required}>*</span></label>
+              <label className={styles.prefLabel}>Gravity Range (N) <span className={styles.required}>*</span></label>
+              <div className={styles.rangeRow}>
+                <input
+                  type="number"
+                  placeholder="Min"
+                  className={`${styles.bookingInput} ${styles.rangeInput}`}
+                  value={gravityMin}
+                  onChange={(e) => setGravityMin(e.target.value)}
+                />
+                <span className={styles.rangeDash}>–</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  className={`${styles.bookingInput} ${styles.rangeInput}`}
+                  value={gravityMax}
+                  onChange={(e) => setGravityMax(e.target.value)}
+                />
+              </div>
+
+              <label className={styles.prefLabel}>Temperature Range (°C) <span className={styles.required}>*</span></label>
+              <div className={styles.rangeRow}>
+                <input
+                  type="number"
+                  placeholder="Min"
+                  className={`${styles.bookingInput} ${styles.rangeInput}`}
+                  value={tempMin}
+                  onChange={(e) => setTempMin(e.target.value)}
+                />
+                <span className={styles.rangeDash}>–</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  className={`${styles.bookingInput} ${styles.rangeInput}`}
+                  value={tempMax}
+                  onChange={(e) => setTempMax(e.target.value)}
+                />
+              </div>
+
+              <label className={styles.prefLabel}>Atmosphere <span className={styles.required}>*</span></label>
               <div className={styles.chipGrid}>
-                {["< $100", "$100–250", "$250–500", "$500+"].map((b) => (
-                  <button key={b} className={`${styles.chip} ${budget === b ? styles.chipActive : ""}`} onClick={() => setBudget(b)}>{b}</button>
+                {atmosphereOptions.map((a) => (
+                  <button
+                    key={a}
+                    className={`${styles.chip} ${atmosphere === a ? styles.chipActive : ""}`}
+                    onClick={() => setAtmosphere(a)}
+                  >
+                    {a}
+                  </button>
                 ))}
               </div>
 
-              <label className={styles.prefLabel}>Amenities <span className={styles.optional}>(optional)</span></label>
+              <label className={styles.prefLabel}>Planet Archetype <span className={styles.required}>*</span></label>
               <div className={styles.chipGrid}>
-                {amenityOptions.map((a) => (
-                  <button key={a} className={`${styles.chip} ${amenities.includes(a) ? styles.chipActive : ""}`} onClick={() => toggleAmenity(a)}>{a}</button>
+                {planetArchetypes.map((b) => (
+                  <button
+                    key={b}
+                    className={`${styles.chip} ${budget === b ? styles.chipActive : ""}`}
+                    onClick={() => setBudget(b)}
+                  >
+                    {b}
+                  </button>
                 ))}
               </div>
+
+              <label className={styles.prefLabel}>Allergies / Special Notes <span className={styles.optional}>(optional)</span></label>
+              <input
+                type="text"
+                placeholder="e.g. sulfur compounds, methane..."
+                className={`${styles.bookingInput} ${styles.prefInput}`}
+                value={allergies}
+                onChange={(e) => setAllergies(e.target.value)}
+              />
             </div>
 
             <button

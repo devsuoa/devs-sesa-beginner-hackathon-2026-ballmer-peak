@@ -162,7 +162,7 @@
 }
 
 .bookingInput::placeholder {
-  color: #ffffff;
+  color: #5b616f;
   opacity: 1;
 }
 
@@ -315,12 +315,13 @@
    during the morph animation
    ============================================ */
 .expandedInner {
-  padding: 36px 48px;
+  padding: 36px 48px 48px;
   opacity: 0;
   /* no transition during morph */
   transition: opacity 0s;
   overflow-y: auto;
-  max-height: 85vh;
+  height: 100%;
+  box-sizing: border-box;
   scrollbar-width: thin;
   scrollbar-color: #2d3f60 transparent;
 }
@@ -481,4 +482,40 @@
 
 :global(.react-datepicker-popper) {
   z-index: 9999 !important;
+}
+
+/* ============================================
+   RANGE ROW (gravity / temperature)
+   ============================================ */
+.rangeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rangeInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.rangeDash {
+  color: #4a5f8a;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* Pref-section text input (full-width) */
+.prefInput {
+  width: 100%;
+}
+
+/* Sub-label inside size chips */
+.chipSub {
+  font-size: 11px;
+  color: #7a8aaa;
+  margin-left: 4px;
+}
+
+.chipActive .chipSub {
+  color: #a0b8e8;
 }
