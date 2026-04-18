@@ -28,6 +28,13 @@ type CardRect = {
   height: number;
 };
 
+type Review = {
+  username: string;
+  rating: number;
+  alien: string;
+  english: string;
+};
+
 // MVP: always send receipt to this address
 const MVP_RECEIPT_EMAIL = "alexl210107@gmail.com";
 
@@ -58,6 +65,66 @@ type RankedPlanet = PlanetCard & {
 
 const preventWheelNumberChange = (event: React.WheelEvent<HTMLInputElement>) => {
   event.currentTarget.blur();
+};
+
+const SHARED_REVIEWS: Review[] = [
+  {
+    username: "King Von",
+    rating: 5,
+    alien: "╎  ⊣𝙹ℸ ̣   ℸ ̣ ∴𝙹  !¡⍑𝙹リᒷᓭ,  𝙹リᒷ  ⎓𝙹∷  ℸ ̣ ⍑ᒷ  !¡ꖎ⚍⊣  ᔑリ↸  𝙹リᒷ  ⎓𝙹∷  ℸ ̣ ⍑ᒷ  ꖎ𝙹ᔑ↸ ╎  ⊣𝙹ℸ ̣   ℸ ̣ ∴𝙹  !¡⍑𝙹リᒷᓭ,  𝙹リᒷ  ⎓𝙹∷  ℸ ̣ ⍑ᒷ  ʖ╎ℸ ̣ ᓵ⍑ᒷᓭ  ᔑリ↸  𝙹リᒷ  ⎓𝙹∷  ℸ ̣ ⍑ᒷ  ↸𝙹⚍⊣⍑",
+    english: "I got two phones, one for the plug and one for the load, I got two phones, one for the bitches and one for the dough.",
+  },
+  {
+    username: "Jabba the Hutt",
+    rating: 4,
+    alien: "⎎⎍☊☍⟒⍀⌇ ⟟⋏ ⌇☊⊑⍜⍜⌰ ⏁⟒⌰⌰⟟⋏' ⋔⟒, ⏃⌰⍙⏃⊬⌇ ⟟⋏ ⏁⊑⟒ ⏚⏃⍀⏚⟒⍀⌇⊑⍜⌿ ☊⊑⟟⟒⎎ ☍⟒⟒⎎ ⏃⟟⋏'⏁ ⏚⍜⎍⏁ ⏁⊑⟟⌇, ☊⊑⟟⟒⎎ ☍⟒⟒⎎ ⏃⟟⋏'⏁ '⏚⍜⎍⏁ ⏁⊑⏃⏁",
+    english: "fuckers in school tellin' me, always in the barbershop Chief Keef ain't bout this, Chief Keef ain't 'bout that",
+  },
+  {
+    username: "Sheldon Cooper",
+    rating: 5,
+    alien: "𓅓𓇌 𓃀𓅱𓇌 𓄿 𓃀𓂧𓄼 𓅱𓈖 𓆑𓅲𓎢𓈎𓇋𓈖𓂕 𓃭𓄿𓅓𓂋𓅱𓈖 𓄿𓈖𓂧 𓏏𓉔𓅂𓅓 𓉔𓅂𓄼 𓉔𓅂𓄼 𓏏𓉔𓅂𓇌 𓋴𓄿𓇌 𓏏𓉔𓄿𓏏 𓈖𓇋𓎼𓎼𓄿 𓂧𓅱𓈖𓂕𓏏 𓃀𓅂 𓊪𓅲𓏏𓏏𓇋𓈖𓂕 𓇋𓈖 𓈖𓅱 𓅃𓅱𓂋𓈎 𓋴𓉔𓅲𓏏 𓏏𓉔𓅂 𓆑𓅲𓎢𓈎 𓅲𓊪𓄼 𓇌𓂕𓄿𓃭𓃭 𓈖𓇋𓎼𓎼𓄿𓋴 𓄿𓇋𓈖𓂕𓏏 𓈎𓈖𓅱𓅃 𓋴𓉔𓇋𓏏",
+    english: "My boy a BD, on fuckin' Lamron and them He, he, they say that ***** don't be puttin' in no work Shut the fuck up, y'all ***** ain't know shit",
+  },
+  {
+    username: "Padme",
+    rating: 3,
+    alien: "Mip felin splat draz kraan torvak glo tak voss murven pleef!",
+    english: "Decent stay overall. The scenery lives up to the brochure but some of the excursions were cancelled without much notice. Staff were helpful when things went wrong.",
+  },
+  {
+    username: "Grand Reagent Thragg",
+    rating: 4,
+    alien: "Kraan voss mip felin splat draz oop torvak glo tak bleem!",
+    english: "Great value for the price. The gravity adjustment pods work well and the food synthesisers offered a surprising variety. Would recommend for first-time space travellers.",
+  },
+];
+
+const PLANET_RATINGS: Record<string, { rating: number; count: string }> = {
+  "Mars":         { rating: 4.1, count: "2.1K" },
+  "Nebula":       { rating: 4.7, count: "890" },
+  "Saturn":       { rating: 4.4, count: "3.3K" },
+  "Venus":        { rating: 3.8, count: "1.5K" },
+  "Kepler-452b":  { rating: 4.9, count: "4.2K" },
+  "Io":           { rating: 3.2, count: "780" },
+  "Sun":          { rating: 4.0, count: "1.1K" },
+  "Cryon":        { rating: 3.5, count: "420" },
+  "Gaia Prime":   { rating: 4.8, count: "5.1K" },
+  "Jupiter Deep": { rating: 3.0, count: "2.8K" },
+  "Trappist-1e":  { rating: 4.5, count: "1.9K" },
+  "Uranus":       { rating: 3.7, count: "1.2K" },
+  "51 Pegasi b":  { rating: 4.2, count: "670" },
+  "Coruscant":    { rating: 4.6, count: "12K" },
+  "Cybertron":    { rating: 4.3, count: "890" },
+  "Neptune":      { rating: 4.0, count: "1.8K" },
+  "Hoth":         { rating: 3.4, count: "650" },
+  "Mercury":      { rating: 3.6, count: "940" },
+  "Mustafar":     { rating: 4.1, count: "780" },
+  "Marris V":     { rating: 4.5, count: "2.3K" },
+  "Tatooine":     { rating: 3.9, count: "2.0K" },
+  "Titan":        { rating: 4.2, count: "1.1K" },
+  "Viltrum":      { rating: 4.4, count: "560" },
+  "Yavin 4":      { rating: 4.6, count: "1.7K" },
 };
 
 
@@ -678,6 +745,23 @@ function PlanetPage() {
     console.log(`Receipt sent to ${MVP_RECEIPT_EMAIL} for booking on ${bookingPlanet?.name}`);
     goToStep(3, "forward");
   };
+
+  // Reviews panel state
+  const [reviewsOpen, setReviewsOpen] = useState(false);
+  const [reviewsPlanet, setReviewsPlanet] = useState<PlanetCard | null>(null);
+  const [translatedReviews, setTranslatedReviews] = useState<Record<number, boolean>>({});
+
+  const openReviews = (planet: PlanetCard, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setReviewsPlanet(planet);
+    setTranslatedReviews({});
+    setReviewsOpen(true);
+  };
+
+  const closeReviews = () => setReviewsOpen(false);
+
+  const toggleTranslate = (idx: number) =>
+    setTranslatedReviews((prev) => ({ ...prev, [idx]: !prev[idx] }));
   const activePlanetIndex = rankedPlanets.findIndex(
     (planet) => planet.id === activePlanetId,
   );
@@ -940,6 +1024,16 @@ function PlanetPage() {
                     >
                       {planet.price} · Book
                     </button>
+                    <button
+                      className={styles.ratingPill}
+                      onClick={(e) => openReviews(planet, e)}
+                      aria-label={`Reviews for ${planet.name}`}
+                    >
+                      <span className={styles.ratingPillStar}>★</span>
+                      <span className={styles.ratingPillScore}>{(PLANET_RATINGS[planet.name]?.rating ?? 4.5).toFixed(1)}</span>
+                      <span className={styles.ratingPillMax}>/5</span>
+                      <span className={styles.ratingPillCount}>{PLANET_RATINGS[planet.name]?.count ?? "2.4K"}</span>
+                    </button>
                   </div>
                 ))}
               </div>
@@ -1150,10 +1244,10 @@ function PlanetPage() {
         {bookingPhase !== "idle" && bookingPlanet && (() => {
           const nights = getNights();
           const nightlyRate = parseInt(bookingPlanet.price.replace(/[^0-9]/g, ""), 10);
-          const subtotal = nightlyRate * nights;
+          const guestsNum = parseInt(searchState.guests, 10) || 1;
+          const subtotal = nightlyRate * nights * guestsNum;
           const tax = Math.round(subtotal * 0.12);
           const total = subtotal + tax;
-          const guestsNum = parseInt(searchState.guests, 10) || 1;
 
           return (
             <div className={`${styles.bookingModal} ${styles[`bookingModal_${bookingPhase}`]}`}>
@@ -1319,6 +1413,51 @@ function PlanetPage() {
             </div>
           );
         })()}
+
+        {/* Reviews backdrop */}
+        {reviewsOpen && (
+          <div className={styles.reviewsBackdrop} onClick={closeReviews} />
+        )}
+
+        {/* Reviews panel — slides in from right */}
+        {reviewsPlanet && (
+          <aside className={`${styles.reviewsPanel} ${reviewsOpen ? styles.reviewsPanelOpen : ""}`}>
+            <div className={styles.reviewsPanelHeader}>
+              <div>
+                <h3 className={styles.reviewsPanelTitle}>{reviewsPlanet.name}</h3>
+                <div className={styles.reviewsPanelRating}>
+                  {[1,2,3,4,5].map((s) => (
+                    <span key={s} className={`${styles.reviewsStar} ${s <= Math.round(PLANET_RATINGS[reviewsPlanet.name]?.rating ?? 4.5) ? styles.reviewsStarFilled : ""}`}>★</span>
+                  ))}
+                  <span className={styles.reviewsPanelScore}>{(PLANET_RATINGS[reviewsPlanet.name]?.rating ?? 4.5).toFixed(1)}</span>
+                  <span className={styles.reviewsPanelCount}>({PLANET_RATINGS[reviewsPlanet.name]?.count ?? "2.4K"} reviews)</span>
+                </div>
+              </div>
+              <button className={styles.reviewsClose} onClick={closeReviews}>✕</button>
+            </div>
+            <div className={styles.reviewsList}>
+              {SHARED_REVIEWS.map((review, idx) => {
+                const isTranslated = !!translatedReviews[idx];
+                return (
+                  <div key={idx} className={styles.reviewCard}>
+                    <div className={styles.reviewCardHeader}>
+                      <span className={styles.reviewUsername}>{review.username}</span>
+                      <div className={styles.reviewStars}>
+                        {[1,2,3,4,5].map((s) => (
+                          <span key={s} className={`${styles.reviewsStar} ${s <= review.rating ? styles.reviewsStarFilled : ""}`}>★</span>
+                        ))}
+                      </div>
+                    </div>
+                    <p className={styles.reviewText}>{isTranslated ? review.english : review.alien}</p>
+                    <button className={styles.translateBtn} onClick={() => toggleTranslate(idx)}>
+                      {isTranslated ? "Show original" : "Translate"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </aside>
+        )}
 
       </div>
     </main>

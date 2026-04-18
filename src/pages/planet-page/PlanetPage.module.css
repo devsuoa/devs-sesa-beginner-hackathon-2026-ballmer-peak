@@ -1460,3 +1460,230 @@
     padding: 18px 20px 24px;
   }
 }
+
+/* ============================================
+   RATING PILL — bottom-left of detail image
+   ============================================ */
+.ratingPill {
+  position: absolute;
+  left: clamp(12px, 1.4vw, 14px);
+  bottom: clamp(12px, 1.6vw, 16px);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: clamp(8px, 1.2vw, 11px) clamp(12px, 1.6vw, 16px);
+  border-radius: 999px;
+  background: rgba(22, 30, 50, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ratingPill:hover {
+  transform: scale(1.05);
+  background: rgba(30, 42, 70, 0.92);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+.ratingPillStar {
+  font-size: clamp(0.95rem, 1.3vw, 1.05rem);
+  color: #f5c518;
+  line-height: 1;
+}
+
+.ratingPillScore {
+  font-size: clamp(0.92rem, 1.3vw, 1.05rem);
+  font-weight: 700;
+  color: #f4f6fb;
+  line-height: 1;
+}
+
+.ratingPillMax {
+  font-size: clamp(0.75rem, 1vw, 0.85rem);
+  font-weight: 500;
+  color: #8a9ab8;
+  line-height: 1;
+}
+
+.ratingPillCount {
+  font-size: clamp(0.72rem, 0.95vw, 0.82rem);
+  color: #8a9ab8;
+  line-height: 1;
+}
+
+/* ============================================
+   REVIEWS BACKDROP
+   ============================================ */
+.reviewsBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background: rgba(10, 14, 26, 0.55);
+  backdrop-filter: blur(3px);
+  animation: reviewsBackdropIn 0.3s ease forwards;
+}
+
+@keyframes reviewsBackdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ============================================
+   REVIEWS PANEL — slides in from right
+   ============================================ */
+.reviewsPanel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 300;
+  width: min(420px, 92vw);
+  background: #1a2540;
+  box-shadow: -8px 0 48px rgba(0, 0, 0, 0.5), -1px 0 0 rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.reviewsPanelOpen {
+  transform: translateX(0);
+}
+
+.reviewsPanelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 28px 28px 20px;
+  border-bottom: 1px solid #2d3f60;
+  flex-shrink: 0;
+}
+
+.reviewsPanelTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #f4f6fb;
+  margin: 0 0 8px;
+}
+
+.reviewsPanelRating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.reviewsStar {
+  font-size: 14px;
+  color: #3a4a66;
+  line-height: 1;
+}
+
+.reviewsStarFilled {
+  color: #f5c518;
+}
+
+.reviewsPanelScore {
+  font-size: 15px;
+  font-weight: 700;
+  color: #f4f6fb;
+  margin-left: 4px;
+}
+
+.reviewsPanelCount {
+  font-size: 12px;
+  color: #7a8aaa;
+  margin-left: 2px;
+}
+
+.reviewsClose {
+  background: none;
+  border: none;
+  color: #4a5f8a;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  margin-top: -2px;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.reviewsClose:hover {
+  color: #e0e8ff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.reviewsList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #2d3f60 transparent;
+}
+
+.reviewCard {
+  background: #131b2e;
+  border-radius: 16px;
+  padding: 18px 20px;
+  border: 1px solid #2d3f60;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.2s ease;
+}
+
+.reviewCard:hover {
+  border-color: #3a5080;
+}
+
+.reviewCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.reviewUsername {
+  font-size: 13px;
+  font-weight: 700;
+  color: #a0b8e8;
+  letter-spacing: 0.02em;
+}
+
+.reviewStars {
+  display: flex;
+  gap: 2px;
+}
+
+.reviewText {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #c8d4ec;
+  margin: 0;
+  font-style: italic;
+}
+
+.translateBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5b8cf5;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-family: "Montserrat", sans-serif;
+  align-self: flex-start;
+  transition: color 0.2s ease;
+}
+
+.translateBtn:hover {
+  color: #a0b8e8;
+}
