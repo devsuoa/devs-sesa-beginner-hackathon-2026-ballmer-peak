@@ -696,6 +696,42 @@
   line-height: 1.4;
 }
 
+.compatibilityBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.18rem 0.58rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.compatibilityBadgeLarge {
+  flex-shrink: 0;
+  padding: 0.38rem 0.88rem;
+  font-size: 0.84rem;
+}
+
+.compatibilityBadge_excellent {
+  color: #dff8df;
+  background: linear-gradient(180deg, rgba(70, 132, 98, 0.9), rgba(44, 94, 68, 0.96));
+  border: 1px solid rgba(145, 214, 172, 0.32);
+}
+
+.compatibilityBadge_good {
+  color: #fff1dc;
+  background: linear-gradient(180deg, rgba(173, 113, 56, 0.9), rgba(123, 77, 33, 0.96));
+  border: 1px solid rgba(255, 202, 136, 0.3);
+}
+
+.compatibilityBadge_low {
+  color: #ffe2e0;
+  background: linear-gradient(180deg, rgba(146, 71, 75, 0.88), rgba(102, 45, 49, 0.96));
+  border: 1px solid rgba(228, 150, 152, 0.28);
+}
+
 .detailPanel {
   flex: 0 0 0;
   width: 0;
@@ -872,10 +908,18 @@
 }
 
 .detailTitle {
-  margin: 0 0 10px;
+  margin: 0;
   font-size: clamp(1.1rem, 1.6vw, 1.55rem);
   line-height: 1.3;
   font-weight: 700;
+}
+
+.detailTitleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 10px;
 }
 
 .detailDescription {
@@ -892,12 +936,23 @@
   gap: clamp(10px, 1.2vw, 12px) clamp(14px, 1.8vw, 18px);
 }
 
+.factColumn {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.2vw, 12px);
+}
+
 .factItem {
   margin: 0;
   color: #f0f4fb;
   font-size: 0.86rem;
   font-weight: 400;
   line-height: 1.45;
+}
+
+.factLabel {
+  color: #9db8e8;
+  font-weight: 700;
 }
 
 @media (max-width: 1180px) {
