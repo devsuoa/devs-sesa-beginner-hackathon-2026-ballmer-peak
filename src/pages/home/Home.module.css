@@ -2,9 +2,42 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #131b2e;
+  position: relative;
+  background: #182436;
   color: #e0e8ff;
   font-family: "Montserrat", sans-serif;
+  overflow-x: hidden;
+}
+
+.page::before,
+.page::after {
+  content: "";
+  position: fixed;
+  inset: -120px;
+  pointer-events: none;
+}
+
+.page::before {
+  background:
+    linear-gradient(180deg, rgba(8, 14, 26, 0.42), rgba(8, 14, 26, 0.7)),
+    url("/stars.jpg");
+  background-position: top left;
+  background-repeat: repeat;
+  background-size: 920px auto;
+  opacity: 0.68;
+  filter: saturate(1.1) brightness(1.02);
+  animation: none;
+}
+
+.page::after {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(92, 128, 196, 0.24), transparent 30%),
+    radial-gradient(circle at 92% 14%, rgba(124, 170, 255, 0.16), transparent 30%),
+    radial-gradient(circle at 72% 64%, rgba(70, 99, 154, 0.2), transparent 34%),
+    radial-gradient(circle at 96% 82%, rgba(111, 137, 196, 0.18), transparent 26%),
+    radial-gradient(circle at 30% 82%, rgba(154, 104, 188, 0.08), transparent 22%);
+  opacity: 0.92;
+  animation: none;
 }
 
 /* ============================================
