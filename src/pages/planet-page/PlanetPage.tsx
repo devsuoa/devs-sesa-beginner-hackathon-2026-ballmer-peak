@@ -1,10 +1,22 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import styles from "./PlanetPage.module.css";
+import type { EditableSearchState, SearchState } from "../../types/search";
 
 type FilterChip = {
   label: string;
   value: string;
+};
+
+type Phase = "idle" | "opening" | "open" | "closing";
+
+type CardRect = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
 };
 
 type PlanetCard = {
@@ -227,6 +239,17 @@ const planetCards: PlanetCard[] = [
   },
 ];
 
+const atmosphereOptions = ["Oxygen", "Carbon Dioxide", "Dihydrogen Monoxide", "Methane", "Vacuum", "Helium", "Hydrogen"];
+const planetArchetypes = ["Solid", "Liquid", "Gas", "Plasma"];
+const guestSizeOptions = [
+  { label: "Small", sublabel: "< 500 cm", value: "small" },
+  { label: "Medium", sublabel: "500-2000 cm", value: "medium" },
+  { label: "Large", sublabel: "> 2000 cm", value: "large" },
+];
+
+const OVERLAY_W = 520;
+const OVERLAY_H = 620;
+
 function PlanetPage() {
   const cometLogo = `${import.meta.env.BASE_URL}comet-logo.png`;
   const { state } = useLocation();
@@ -238,16 +261,44 @@ function PlanetPage() {
     return null;
   }
 
-  const { location, arrivalDate, departureDate, guests, guestSize, atmosphere, budget } = state;
+  const initialState = state as SearchState;
+  const editButtonRef = useRef<HTMLButtonElement>(null);
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [cardRect, setCardRect] = useState<CardRect | null>(null);
 
-  const arrivalStr = arrivalDate ? new Date(arrivalDate).toLocaleDateString("en-NZ", { day: "numeric", month: "short" }) : "";
-  const departureStr = departureDate ? new Date(departureDate).toLocaleDateString("en-NZ", { day: "numeric", month: "short" }) : "";
+  const toEditableState = (value: SearchState): EditableSearchState => ({
+    ...value,
+    arrivalDate: value.arrivalDate ? new Date(value.arrivalDate) : null,
+    departureDate: value.departureDate ? new Date(value.departureDate) : null,
+  });
+
+  const [searchState, setSearchState] = useState<EditableSearchState>(() => toEditableState(initialState));
+  const [draftState, setDraftState] = useState<EditableSearchState>(() => toEditableState(initialState));
+
+  const arrivalStr = searchState.arrivalDate ? new Date(searchState.arrivalDate).toLocaleDateString("en-NZ", { day: "numeric", month: "short" }) : "";
+  const departureStr = searchState.departureDate ? new Date(searchState.departureDate).toLocaleDateString("en-NZ", { day: "numeric", month: "short" }) : "";
+
+  const extraFilters: FilterChip[] = [
+    { label: "Guest size", value: searchState.guestSize },
+    { label: "Gravity range", value: `${searchState.gravityMin} - ${searchState.gravityMax} N` },
+    { label: "Temp range", value: `${searchState.tempMin} - ${searchState.tempMax} C` },
+    { label: "Atmosphere", value: searchState.atmosphere },
+    { label: "Archetype", value: searchState.budget },
+  ];
 
   const filters = [
-    { label: "Location:", value: location },
+    { label: "Location:", value: searchState.location },
     { label: "Duration:", value: `${arrivalStr} – ${departureStr}` },
-    { label: "Guests:", value: `${guests} · ${guestSize} · ${atmosphere} atm · ${budget}` },
+    { label: "Guests:", value: searchState.guests },
   ];
+  const isNextReady = draftState.location.trim() !== "" && draftState.arrivalDate !== null && draftState.departureDate !== null;
+  const guestsNum = parseInt(draftState.guests, 10);
+  const isGuestsValid = draftState.guests.trim() !== "" && !isNaN(guestsNum) && guestsNum > 0;
+  const isGravityValid = draftState.gravityMin.trim() !== "" && draftState.gravityMax.trim() !== "" && !isNaN(parseFloat(draftState.gravityMin)) && !isNaN(parseFloat(draftState.gravityMax));
+  const isTempValid = draftState.tempMin.trim() !== "" && draftState.tempMax.trim() !== "" && !isNaN(parseFloat(draftState.tempMin)) && !isNaN(parseFloat(draftState.tempMax));
+  const isSearchReady = isNextReady && isGuestsValid && draftState.guestSize !== "" && isGravityValid && isTempValid && draftState.atmosphere !== "" && draftState.budget !== "";
+  const dimmed = phase !== "idle";
+  const sectionsDimmed = phase === "opening" || phase === "open";
   const [isDetailOpen, setIsDetailOpen] = useState(true);
   const [isTrackAnimated, setIsTrackAnimated] = useState(false);
   const [activePlanetId, setActivePlanetId] = useState<number>(planetCards[0].id);
@@ -262,10 +313,60 @@ function PlanetPage() {
     setIsDetailOpen(true);
   };
 
+  const getOverlayStyle = (): React.CSSProperties => {
+    if (!cardRect) return {};
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    if (phase === "opening" || phase === "closing") {
+      return {
+        top: cardRect.top,
+        left: cardRect.left,
+        width: cardRect.width,
+        height: cardRect.height,
+        borderRadius: "999px",
+      };
+    }
+
+    return {
+      top: (vh - OVERLAY_H) / 2,
+      left: (vw - OVERLAY_W) / 2,
+      width: OVERLAY_W,
+      height: OVERLAY_H,
+      maxHeight: "85vh",
+      borderRadius: "24px",
+    };
+  };
+
+  const handleOpenEdit = () => {
+    if (!editButtonRef.current) return;
+    setDraftState(searchState);
+    const rect = editButtonRef.current.getBoundingClientRect();
+    setCardRect({ top: rect.top, left: rect.left, width: rect.width, height: rect.height });
+    setPhase("opening");
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => setPhase("open"))
+    );
+  };
+
+  const closeOverlay = () => {
+    setPhase("closing");
+    setTimeout(() => {
+      setPhase("idle");
+      setCardRect(null);
+    }, 480);
+  };
+
+  const handleApplySearch = () => {
+    if (!isSearchReady) return;
+    setSearchState(draftState);
+    closeOverlay();
+  };
+
   return (
     <main className={styles.page}>
       <div className={styles.shell}>
-        <section className={styles.topBar}>
+        <section className={`${styles.topBar} ${sectionsDimmed ? styles.sectionDimmed : ""}`}>
           <div className={styles.logo}>
             <img src={cometLogo} alt="BOOKING.COMET" className={styles.logoImage} />
           </div>
@@ -275,9 +376,12 @@ function PlanetPage() {
           </a>
         </section>
 
-        <section className={styles.searchBar} aria-label="Planet search filters">
+        <section className={`${styles.searchBar} ${sectionsDimmed ? styles.sectionDimmed : ""}`} aria-label="Planet search filters">
           {filters.map((filter) => (
-            <div key={filter.label} className={styles.filterChip}>
+            <div
+              key={filter.label}
+              className={`${styles.filterChip} ${filter.label === "Guests:" ? styles.filterChipCompact : ""}`}
+            >
               <span className={styles.filterDot} aria-hidden="true" />
               <p className={styles.filterText}>
                 <span className={styles.filterLabel}>{filter.label}</span>
@@ -286,13 +390,41 @@ function PlanetPage() {
             </div>
           ))}
 
-          <button type="button" className={styles.searchButton}>
+          <div className={`${styles.filterChip} ${styles.filterChipWide} ${styles.filterChipHoverable}`}>
+            <button type="button" className={styles.filterChipButton} aria-label="Show extra filters">
+              <span className={styles.filterDot} aria-hidden="true" />
+              <p className={styles.filterText}>
+                <span className={styles.filterLabel}>Extra Preferences:</span>
+                <span>Hover to view</span>
+              </p>
+            </button>
+
+            <div className={styles.filterTooltip} role="tooltip">
+              {extraFilters.map((filter) => (
+                <p key={filter.label} className={styles.tooltipRow}>
+                  <span className={styles.tooltipLabel}>{filter.label}:</span>
+                  <span>{filter.value}</span>
+                </p>
+              ))}
+            </div>
+          </div>
+
+          <button
+            ref={editButtonRef}
+            type="button"
+            className={`${styles.actionButton} ${dimmed ? styles.actionButtonHidden : ""}`}
+            onClick={handleOpenEdit}
+          >
+            Edit
+          </button>
+
+          <button type="button" className={styles.actionButton}>
             Search
           </button>
         </section>
 
         <section
-          className={`${styles.content} ${isDetailOpen ? styles.contentExpanded : ""}`}
+          className={`${styles.content} ${isDetailOpen ? styles.contentExpanded : ""} ${sectionsDimmed ? styles.sectionDimmed : ""}`}
           aria-label="Available planets"
         >
           <div
@@ -386,6 +518,150 @@ function PlanetPage() {
             </div>
           </aside>
         </section>
+
+        <div
+          className={`${styles.backdrop} ${dimmed ? styles.backdropVisible : ""}`}
+          onClick={closeOverlay}
+        />
+
+        {phase !== "idle" && cardRect && (
+          <div
+            className={`${styles.expandedOverlay} ${styles[`expandedOverlay_${phase}`]}`}
+            style={getOverlayStyle()}
+          >
+            <div className={`${styles.expandedInner} ${phase === "open" ? styles.expandedInnerVisible : ""}`}>
+              <button className={styles.backButton} onClick={closeOverlay}>← Back</button>
+              <h2 className={styles.overlayTitle}>Your Preferences</h2>
+
+              <div className={styles.editIntroGroup}>
+                <input
+                  type="text"
+                  placeholder="Galactic Sector"
+                  className={styles.bookingInput}
+                  value={draftState.location}
+                  onChange={(e) => setDraftState((current) => ({ ...current, location: e.target.value }))}
+                />
+                <DatePicker
+                  selected={draftState.arrivalDate}
+                  onChange={(date: Date | null) => setDraftState((current) => ({ ...current, arrivalDate: date }))}
+                  placeholderText="Arrival date"
+                  className={styles.bookingInput}
+                  portalId="root"
+                />
+                <DatePicker
+                  selected={draftState.departureDate}
+                  onChange={(date: Date | null) => setDraftState((current) => ({ ...current, departureDate: date }))}
+                  placeholderText="Departure date"
+                  className={styles.bookingInput}
+                  portalId="root"
+                />
+              </div>
+
+              <div className={styles.summaryPill}>
+                <span>📍 {draftState.location || "Unset"}</span>
+                <span>·</span>
+                <span>{draftState.arrivalDate?.toLocaleDateString() || "No arrival"} → {draftState.departureDate?.toLocaleDateString() || "No departure"}</span>
+              </div>
+
+              <div className={styles.prefGroup}>
+                <label className={styles.prefLabel}>Guests <span className={styles.required}>*</span></label>
+                <input
+                  type="number"
+                  min="1"
+                  placeholder="Number of guests"
+                  className={`${styles.bookingInput} ${styles.prefInput}`}
+                  value={draftState.guests}
+                  onChange={(e) => setDraftState((current) => ({ ...current, guests: e.target.value }))}
+                />
+
+                <label className={styles.prefLabel}>Guest Size <span className={styles.required}>*</span></label>
+                <div className={styles.chipGrid}>
+                  {guestSizeOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      className={`${styles.chip} ${draftState.guestSize === opt.value ? styles.chipActive : ""}`}
+                      onClick={() => setDraftState((current) => ({ ...current, guestSize: opt.value }))}
+                    >
+                      {opt.label} <span className={styles.chipSub}>{opt.sublabel}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <label className={styles.prefLabel}>Gravity Range (N) <span className={styles.required}>*</span></label>
+                <div className={styles.rangeRow}>
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    className={`${styles.bookingInput} ${styles.rangeInput}`}
+                    value={draftState.gravityMin}
+                    onChange={(e) => setDraftState((current) => ({ ...current, gravityMin: e.target.value }))}
+                  />
+                  <span className={styles.rangeDash}>-</span>
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    className={`${styles.bookingInput} ${styles.rangeInput}`}
+                    value={draftState.gravityMax}
+                    onChange={(e) => setDraftState((current) => ({ ...current, gravityMax: e.target.value }))}
+                  />
+                </div>
+
+                <label className={styles.prefLabel}>Temperature Range (°C) <span className={styles.required}>*</span></label>
+                <div className={styles.rangeRow}>
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    className={`${styles.bookingInput} ${styles.rangeInput}`}
+                    value={draftState.tempMin}
+                    onChange={(e) => setDraftState((current) => ({ ...current, tempMin: e.target.value }))}
+                  />
+                  <span className={styles.rangeDash}>-</span>
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    className={`${styles.bookingInput} ${styles.rangeInput}`}
+                    value={draftState.tempMax}
+                    onChange={(e) => setDraftState((current) => ({ ...current, tempMax: e.target.value }))}
+                  />
+                </div>
+
+                <label className={styles.prefLabel}>Atmosphere <span className={styles.required}>*</span></label>
+                <div className={styles.chipGrid}>
+                  {atmosphereOptions.map((option) => (
+                    <button
+                      key={option}
+                      className={`${styles.chip} ${draftState.atmosphere === option ? styles.chipActive : ""}`}
+                      onClick={() => setDraftState((current) => ({ ...current, atmosphere: option }))}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+
+                <label className={styles.prefLabel}>Planet Archetype <span className={styles.required}>*</span></label>
+                <div className={styles.chipGrid}>
+                  {planetArchetypes.map((option) => (
+                    <button
+                      key={option}
+                      className={`${styles.chip} ${draftState.budget === option ? styles.chipActive : ""}`}
+                      onClick={() => setDraftState((current) => ({ ...current, budget: option }))}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                className={`${styles.overlaySearchButton} ${isSearchReady ? styles.overlaySearchButtonReady : ""}`}
+                disabled={!isSearchReady}
+                onClick={handleApplySearch}
+              >
+                Save edits
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

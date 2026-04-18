@@ -1,8 +1,9 @@
-import { useState, useRef, type SetStateAction } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "./Home.module.css";
+import type { SearchState } from "../../types/search";
 
 type Phase = "idle" | "opening" | "open" | "closing";
 type AuthPhase = "idle" | "entering" | "open" | "leaving";
@@ -36,6 +37,7 @@ function Home() {
   const [location, setLocation] = useState("");
   const [phase, setPhase] = useState<Phase>("idle");
   const [cardRect, setCardRect] = useState<CardRect | null>(null);
+  const cometLogo = `${import.meta.env.BASE_URL}comet-logo.png`;
 
   // Auth state
   const [authPhase, setAuthPhase] = useState<AuthPhase>("idle");
@@ -65,11 +67,30 @@ function Home() {
   const [tempMax, setTempMax] = useState("");
   const [atmosphere, setAtmosphere] = useState("");
   const [budget, setBudget] = useState("");
-  const [allergies, setAllergies] = useState("");
 
   const cardRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const cometLogo = `${import.meta.env.BASE_URL}comet-logo.png`;
+
+  const handleSearch = () => {
+    if (!isSearchReady) return;
+    const nextState: SearchState = {
+      location,
+      arrivalDate,
+      departureDate,
+      guests,
+      guestSize,
+      gravityMin,
+      gravityMax,
+      tempMin,
+      tempMax,
+      atmosphere,
+      budget,
+    };
+
+    navigate("/planet-page", {
+      state: nextState,
+    });
+  };
 
   const isNextReady = location.trim() !== "" && arrivalDate !== null && departureDate !== null;
   const guestsNum = parseInt(guests, 10);
@@ -100,13 +121,6 @@ function Home() {
   const handleClose = () => {
     setPhase("closing");
     setTimeout(() => { setPhase("idle"); setCardRect(null); }, 480);
-  };
-
-  const handleSearch = () => {
-    if (!isSearchReady) return;
-    navigate("/planet-page", {
-      state: { location, arrivalDate, departureDate, guests, guestSize, gravityMin, gravityMax, tempMin, tempMax, atmosphere, budget, allergies },
-    });
   };
 
   // ── Auth modal handlers ──
@@ -192,8 +206,20 @@ function Home() {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                 />
-                <DatePicker selected={arrivalDate} onChange={(date: SetStateAction<Date | null>) => setArrivalDate(date)} placeholderText="Arrival date" className={styles.bookingInput} portalId="root" />
-                <DatePicker selected={departureDate} onChange={(date: SetStateAction<Date | null>) => setDepartureDate(date)} placeholderText="Departure date" className={styles.bookingInput} portalId="root" />
+                <DatePicker
+                  selected={arrivalDate}
+                  onChange={(date: Date | null) => setArrivalDate(date)}
+                  placeholderText="Arrival date"
+                  className={styles.bookingInput}
+                  portalId="root"
+                />
+                <DatePicker
+                  selected={departureDate}
+                  onChange={(date: Date | null) => setDepartureDate(date)}
+                  placeholderText="Departure date"
+                  className={styles.bookingInput}
+                  portalId="root"
+                />
               </div>
               <button
                 className={`${styles.nextButton} ${isNextReady ? styles.nextButtonReady : ""}`}
@@ -270,9 +296,6 @@ function Home() {
                   <button key={b} className={`${styles.chip} ${budget === b ? styles.chipActive : ""}`} onClick={() => setBudget(b)}>{b}</button>
                 ))}
               </div>
-
-              <label className={styles.prefLabel}>Allergies / Special Notes <span className={styles.optional}>(optional)</span></label>
-              <input type="text" placeholder="e.g. sulfur compounds, methane..." className={`${styles.bookingInput} ${styles.prefInput}`} value={allergies} onChange={(e) => setAllergies(e.target.value)} />
             </div>
             <button className={`${styles.searchButton} ${isSearchReady ? styles.searchButtonReady : ""}`} disabled={!isSearchReady} onClick={handleSearch}>
               🔍 Search spaces
