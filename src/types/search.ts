@@ -10,6 +10,7 @@ export type SearchState = {
   tempMax: string;
   atmosphere: string;
   budget: string;
+  username?: string;
 };
 
 export const ATMOSPHERE_OPTIONS = [

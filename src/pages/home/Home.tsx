@@ -94,6 +94,7 @@ function Home() {
       tempMax,
       atmosphere,
       budget,
+      username: isLoggedIn ? resolvedUsername : undefined,
     };
 
     navigate("/planet-page", {
@@ -176,9 +177,14 @@ function Home() {
 
       {/* Top Bar */}
       <section className={styles.topBar}>
-        <div className={styles.logo}>
+        <button
+          type="button"
+          className={styles.logoButton}
+          onClick={() => navigate("/")}
+          aria-label="Go to home page"
+        >
           <img src={cometLogo} alt="BOOKING.COMET" className={styles.logoImage} />
-        </div>
+        </button>
         {isLoggedIn ? (
           <span className={styles.usernameDisplay}>{resolvedUsername}</span>
         ) : (

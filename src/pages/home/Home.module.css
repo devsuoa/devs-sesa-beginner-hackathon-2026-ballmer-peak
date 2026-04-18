@@ -29,6 +29,15 @@
   align-items: center;
 }
 
+.logoButton {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
 .logoImage {
   width: auto;
   height: 42px;

@@ -67,6 +67,15 @@
   align-items: center;
 }
 
+.logoButton {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
 .logoImage {
   width: auto;
   height: 42px;
@@ -97,6 +106,13 @@
   background: rgba(91, 116, 164, 0.28);
   transform: translateY(-1px);
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.16);
+}
+
+.usernameDisplay {
+  font-size: 13px;
+  font-weight: 600;
+  color: #a0b8e8;
+  letter-spacing: 0.03em;
 }
 
 .sectionDimmed {

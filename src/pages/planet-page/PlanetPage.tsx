@@ -571,6 +571,7 @@ function PlanetPage() {
   }
 
   const initialState = state as SearchState;
+  const username = initialState.username;
   const editButtonRef = useRef<HTMLButtonElement>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [cardRect, setCardRect] = useState<CardRect | null>(null);
@@ -757,13 +758,18 @@ function PlanetPage() {
     <main className={styles.page}>
       <div className={styles.shell}>
         <section className={`${styles.topBar} ${sectionsDimmed ? styles.sectionDimmed : ""}`}>
-          <div className={styles.logo}>
+          <button
+            type="button"
+            className={styles.logoButton}
+            onClick={() => navigate("/")}
+            aria-label="Go to home page"
+          >
             <img src={cometLogo} alt="BOOKING.COMET" className={styles.logoImage} />
-          </div>
+          </button>
 
-          <a href="/" className={styles.outlineButton}>
-            Get Started
-          </a>
+          {username ? (
+            <span className={styles.usernameDisplay}>{username}</span>
+          ) : null}
         </section>
 
         <section className={`${styles.searchBar} ${sectionsDimmed ? styles.sectionDimmed : ""}`} aria-label="Planet search filters">
