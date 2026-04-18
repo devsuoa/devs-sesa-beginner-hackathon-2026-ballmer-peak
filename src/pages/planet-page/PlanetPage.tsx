@@ -617,6 +617,8 @@ function PlanetPage() {
   const [isDetailOpen, setIsDetailOpen] = useState(true);
   const [isTrackAnimated, setIsTrackAnimated] = useState(false);
   const [activePlanetId, setActivePlanetId] = useState<number>(initialRankedPlanets[0]?.id ?? planetCards[0].id);
+  const [detailPanelHeight, setDetailPanelHeight] = useState<number | null>(null);
+  const detailPanelRef = useRef<HTMLElement>(null);
   const rankedPlanets = useMemo<RankedPlanet[]>(
     () => rankPlanets(appliedSearchState),
     [appliedSearchState],
@@ -687,6 +689,30 @@ function PlanetPage() {
     setActivePlanetId(rankedPlanets[0].id);
     setIsTrackAnimated(false);
   }, [rankedPlanets]);
+
+  useEffect(() => {
+    if (!isDetailOpen || !detailPanelRef.current) {
+      setDetailPanelHeight(null);
+      return;
+    }
+
+    const panel = detailPanelRef.current;
+    const updateHeight = () => {
+      setDetailPanelHeight(panel.getBoundingClientRect().height);
+    };
+
+    updateHeight();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateHeight);
+      return () => window.removeEventListener("resize", updateHeight);
+    }
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(panel);
+
+    return () => observer.disconnect();
+  }, [activePlanet.id, isDetailOpen]);
 
   const handlePlanetSelect = (planetId: number) => {
     setIsTrackAnimated(isDetailOpen);
@@ -829,6 +855,11 @@ function PlanetPage() {
         >
           <div
             className={`${styles.galleryGrid} ${isDetailOpen ? styles.galleryGridExpanded : ""}`}
+            style={
+              isDetailOpen && detailPanelHeight
+                ? { maxHeight: `${detailPanelHeight}px` }
+                : undefined
+            }
           >
             {rankedPlanets.map((planet) => {
               const isActive = planet.id === activePlanetId;
@@ -871,6 +902,7 @@ function PlanetPage() {
           </div>
 
           <aside
+            ref={detailPanelRef}
             className={`${styles.detailPanel} ${isDetailOpen ? styles.detailPanelOpen : ""}`}
             aria-hidden={!isDetailOpen}
             aria-live="polite"
