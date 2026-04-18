@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Button from "../../components/button/Button";
 import buttonStyles from "../../components/button/Button.module.css";
-import styles from "./ApiExample.module.css";
+import styles from "./PlanetPage.module.css";
 
 // A page that demonstrates how to fetch data from an API in React.
 function ApiExample() {

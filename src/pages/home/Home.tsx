@@ -23,7 +23,7 @@ function Home() {
           </p>
 
           {/* Button to API Example */}
-          <Button text="API Example" to="/api-example" />
+          <Button text="planet page" to="/planet-page" />
         </div>
         <div className={styles.bannerImage}>
           <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="logo" />
