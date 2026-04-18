@@ -18,6 +18,7 @@ function Home() {
   const [location, setLocation] = useState("");
   const [phase, setPhase] = useState<Phase>("idle");
   const [cardRect, setCardRect] = useState<CardRect | null>(null);
+  const cometLogo = `${import.meta.env.BASE_URL}comet-logo.png`;
 
   const [guests, setGuests] = useState("");
   const [guestSize, setGuestSize] = useState("");
@@ -110,13 +111,15 @@ const atmosphereOptions = ["Oxygen", "Carbon Dioxide", "Dihydrogen Monoxide", "M
   return (
     <div className={styles.page}>
       {/* Top Bar */}
-      <section className={`${styles.topBar} ${sectionsDimmed ? styles.sectionDimmed : ""}`}>
-        <div className={styles.logo}>
-          <div className={styles.logoDot} />
-          <span>Logo</span>
-        </div>
-        <a href="/" className={styles.outlineButton}>Get Started</a>
-      </section>
+      <section className={styles.topBar}>
+          <div className={styles.logo}>
+            <img src={cometLogo} alt="BOOKING.COMET" className={styles.logoImage} />
+          </div>
+
+          <a href="/" className={styles.outlineButton}>
+            Get Started
+          </a>
+        </section>
 
       {/* Main Content */}
       <section className={`${styles.mainContent} ${sectionsDimmed ? styles.sectionDimmed : ""}`}>
