@@ -1,6 +1,8 @@
 import Button from "../../components/button/Button";
 import styles from "./Home.module.css";
 
+const marsImage = `${import.meta.env.BASE_URL}mars.jpeg`;
+
 // The home page of the application.
 function Home() {
   return (
@@ -26,7 +28,7 @@ function Home() {
           <Button text="planet page" to="/planet-page" />
         </div>
         <div className={styles.bannerImage}>
-          <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="logo" />
+          <img src={marsImage} alt="Mars" />
         </div>
       </section>
 
